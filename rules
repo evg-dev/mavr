@@ -62,3 +62,18 @@ Q (масть любая) - игрок, которому пренадлежит 
 
 
 ########################################################################
+
+Коллизии наложения карт.
+
+ActorGestureListener()
+ChangeListener()
+ShapeRenderer
+Gdx.input.setInputProcessor
+
+Stack<Player> players = new Stack<Player>();
+		players.push(new Player("Dealer"));
+		players.push(new Player("Steve"));
+
+this.setScreen(new BlackjackScreen(this, players));
+
+
