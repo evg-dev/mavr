@@ -13,17 +13,18 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 import java.util.Stack;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.addListener;
-
 public class GameScreen extends ScreenAdapter {
+
 	public final static float CARD_WIDTH = 0.75f;
 	public final static float CARD_HEIGHT = CARD_WIDTH * 277f / 200f;
 	public final static float MINIMUM_VIEWPORT_SIZE = 5f;
-	private final Stack<Player> players;
+	//	public static Stack<Player> players;
+//
+	public Stack<Player> players;
 	//	private static TextureAtlas atlas;
 	public Card card;
 	private MavrGame game;
-	private CardDeck cardDeck;
+	public CardDeck cardDeck;
 
 	private TextButton drawCardButton;
 	private SpriteBatch batch;
@@ -37,13 +38,14 @@ public class GameScreen extends ScreenAdapter {
 	Vector3 touchPos;
 	public Card sprite;
 	public static TextureAtlas atlas;
+	private Card lastPlayedCard;
+	private Card topDeck;
 
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, Stack<Player> players) {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
-
 	}
 
 	/**
@@ -66,15 +68,32 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch = new SpriteBatch();
 
 
-		this.cardDeck.getCardToPlayer();
+		// player1 cards
+		// player2 cards
+		for (Player player : players
+		) {
+			for (Card card : player.cards
+			) {
+				//card render
+			}
+		}
 
-		sprite = new Card(MavrGame.Suit.DIAMONDS, 0, 0, false, 11);
-		sprite.setSize(CARD_WIDTH, CARD_HEIGHT);
-		sprite.setPosition(sprite.X, sprite.Y);
+
+		// Deck
+		topDeck = this.cardDeck.shuffleDeckCards.peek();
+		topDeck.turned = true;
+		topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
+		topDeck.setPosition(-0.5f, -0.25f);
+
+		// played cards
+		lastPlayedCard = this.cardDeck.playedCards.peek();
+		lastPlayedCard.setSize(CARD_WIDTH, CARD_HEIGHT);
+		lastPlayedCard.setPosition(0.5f, -0.25f);
 
 
 		touchPos = new Vector3();
 		cam = new OrthographicCamera();
+
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			public boolean touchUp(int x, int y, int pointer, int button) {
@@ -135,7 +154,8 @@ public class GameScreen extends ScreenAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		spriteBatch.setProjectionMatrix(cam.combined);
 		spriteBatch.begin();
-		sprite.draw(spriteBatch);
+		topDeck.draw(spriteBatch);
+		lastPlayedCard.draw(spriteBatch);
 //		back.draw(spriteBatch);
 //		diamonds.draw(spriteBatch);
 //		front.draw(spriteBatch);
@@ -159,4 +179,6 @@ public class GameScreen extends ScreenAdapter {
 //			}
 //		}
 	}
+
+
 }

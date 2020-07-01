@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Player {
     public String name;
-    private ArrayList<Card> cards;
+    public ArrayList<Card> cards;
     private int score;
 
     Player(String name) {
@@ -16,6 +16,14 @@ public class Player {
     public int getScore() {
         return this.score;
     }
+
+//    public int getCard() {
+//
+//    }
+//
+//    public int pushCard() {
+//
+//    }
 
     /**
      * Calculate score after round and check winner

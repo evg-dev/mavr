@@ -18,8 +18,10 @@ import java.util.Stack;
 
 public class MavrGame extends Game {
 
-    private CardDeck cardDeck;
-    private Stack<Player> players;
+    private Player player1;
+    private Player player2;
+    public CardDeck cardDeck;
+    private Card lastCard;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -55,8 +57,16 @@ public class MavrGame extends Game {
 
     @Override
     public void create() {
-        players = new Stack<Player>();
-        cardDeck = new CardDeck();
+        Stack<Player> players = new Stack<Player>();
+        //Create Game table and render
+        player1 = new Player("Player1");
+        player2 = new Player("Player2");
+        players.add(player1);
+        players.add(player2);
+        cardDeck = new CardDeck(players);
+        lastCard = cardDeck.shuffleDeckCards.pop();
+        cardDeck.playedCards.add(lastCard);
+
         this.setScreen(new GameScreen(this, cardDeck, players));
     }
 
