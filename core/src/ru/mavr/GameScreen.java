@@ -1,7 +1,6 @@
 package ru.mavr;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -29,17 +28,14 @@ public class GameScreen extends ScreenAdapter {
 	private TextButton drawCardButton;
 	private SpriteBatch batch;
 	SpriteBatch spriteBatch;
-	Sprite back;
-	Sprite diamonds;
-	Sprite front;
-	Sprite front2;
-	Sprite front3;
 	OrthographicCamera cam;
 	Vector3 touchPos;
 	public Card sprite;
 	public static TextureAtlas atlas;
 	private Card lastPlayedCard;
 	private Card topDeck;
+	int i;
+	int count;
 
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, Stack<Player> players) {
@@ -56,78 +52,47 @@ public class GameScreen extends ScreenAdapter {
 		return atlas;
 	}
 
-//	@Override
-//	public void create() {
-//		cardDeck = new CardDeck();
-//	}
-
-	@Override
-	public void show() {
-
-
-		spriteBatch = new SpriteBatch();
-
-
-		// player1 cards
-		// player2 cards
-		for (Player player : players
-		) {
-			for (Card card : player.cards
-			) {
-				//card render
-			}
-		}
-
-
-		// Deck
+	private void renderCard() {
+		// deck
 		topDeck = this.cardDeck.shuffleDeckCards.peek();
 		topDeck.turned = true;
 		topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
-		topDeck.setPosition(-0.5f, -0.25f);
-
+		topDeck.setPosition(-1.05f, -0.5f);
+		topDeck.draw(spriteBatch);
 		// played cards
 		lastPlayedCard = this.cardDeck.playedCards.peek();
 		lastPlayedCard.setSize(CARD_WIDTH, CARD_HEIGHT);
-		lastPlayedCard.setPosition(0.5f, -0.25f);
+		lastPlayedCard.setPosition(0.05f, -0.5f);
+		lastPlayedCard.draw(spriteBatch);
 
-
-		touchPos = new Vector3();
-		cam = new OrthographicCamera();
-
-
-		Gdx.input.setInputProcessor(new InputAdapter() {
-			public boolean touchUp(int x, int y, int pointer, int button) {
-				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
-					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
-//						System.out.println("Click sprite");
-
-						sprite.setPosition(sprite.getX() + 0.5f, -2);
-						//clicked on sprite
-						// do something that vanish the object clicked
-					}
+		i = 0;
+		for (Player player : players
+		) {
+			float len = player.cards.size();
+			count = 0;
+			// for 2 players, TODO: for 4
+			for (Card card : player.cards
+			) {
+				float cardX;
+				if (len <= 4) {
+					cardX = -len / 2 + count;
+				} else {
+					cardX = -2 + 4 / len * count;
 				}
-//				float touchX = temp.x;
-//				float touchY = temp.y;
-				System.out.println("Touch");
-				System.out.println(touchPos.x);
-				System.out.println(sprite.getX());
-				return false;
+				card.setSize(CARD_WIDTH, CARD_HEIGHT);
+				if (i == 0) {
+					card.setPosition(cardX, -2);
+				}
+
+				if (i == 1) {
+					card.setPosition(cardX, 1);
+				}
+				card.draw(this.spriteBatch);
+				count++;
 			}
-
-//			public boolean touchUp(int x,int y,int pointer,int button){
-//				return true; // возвращает true, сообщая, что событие было обработано
-//			}
-		});
-
-
+			i++;
+		}
 	}
-
-//	addListener(new ClickListener() {
-//		@Override
-//		public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-//			Gdx.input.vibrate(25); // Дадим пользователю понять, что он нажал немного вибрируя в момент касания
 
 	@Override
 	public void resize(int width, int height) {
@@ -142,11 +107,49 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	@Override
+	public void show() {
+		spriteBatch = new SpriteBatch();
+		touchPos = new Vector3();
+		cam = new OrthographicCamera();
+
+//		Gdx.input.setInputProcessor(new InputAdapter() {
+//			public boolean touchUp(int x, int y, int pointer, int button) {
+//				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+//				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
+//				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
+//					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
+//						System.out.println("Click sprite");
+
+//						sprite.setPosition(sprite.getX() + 0.5f, -2);
+		//clicked on sprite
+		// do something that vanish the object clicked
+//					}
+//				}
+//				float touchX = temp.x;
+//				float touchY = temp.y;
+//				System.out.println("Touch");
+//				System.out.println(touchPos.x);
+//				System.out.println(sprite.getX());
+//				return false;
+//			}
+
+//			public boolean touchUp(int x,int y,int pointer,int button){
+//				return true; // возвращает true, сообщая, что событие было обработано
+//			}
+//		});
+
+	}
+//	addListener(new ClickListener() {
+//		@Override
+//		public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+
+//			Gdx.input.vibrate(25); // Дадим пользователю понять, что он нажал немного вибрируя в момент касания
+
+	@Override
 	public void dispose() {
 		spriteBatch.dispose();
 		atlas.dispose();
 	}
-
 
 	//	@Override
 	public void render(float delta) {
@@ -154,31 +157,7 @@ public class GameScreen extends ScreenAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		spriteBatch.setProjectionMatrix(cam.combined);
 		spriteBatch.begin();
-		topDeck.draw(spriteBatch);
-		lastPlayedCard.draw(spriteBatch);
-//		back.draw(spriteBatch);
-//		diamonds.draw(spriteBatch);
-//		front.draw(spriteBatch);
-//		front2.draw(spriteBatch);
-//		front3.draw(spriteBatch);
-//		sprite.draw(spriteBatch);
+		renderCard();
 		spriteBatch.end();
-
-//		Gdx.input.setInputProcessor(new CameraInputController(cam));
-
-//		if (Gdx.input.isTouched()) {
-//			System.out.println("32452345");
-//
-//			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0); //when the screen is touched, the coordinates are inserted into the vector
-//			cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-//			if (touchPos.x > front.getX() && touchPos.x < front.getX() + front.getWidth()) {
-//				if (touchPos.y > front.getY() && touchPos.y < front.getY() + front.getHeight()) {
-//					//clicked on sprite
-//					// do something that vanish the object clicked
-//				}
-//			}
-//		}
 	}
-
-
 }

@@ -15,7 +15,6 @@ public class CardDeck {
     MavrGame game;
 
     CardDeck(Stack<Player> players) {
-//        this.players;
         this.playedCards = new Stack<Card>();
         Stack<Card> deckCards = new Stack<Card>();
         for (MavrGame.Suit suit : MavrGame.Suit.values()
@@ -41,15 +40,13 @@ public class CardDeck {
 
     /**
      * @param players
-     * @return
      */
-    public boolean initialCardToPlayers(Stack<Player> players) {
+    public void initialCardToPlayers(Stack<Player> players) {
         for (int i = 0; i < 4; i++) {
             for (Player player : players
             ) {
                 player.cards.add(this.shuffleDeckCards.pop());
             }
         }
-        return true;
     }
 }
