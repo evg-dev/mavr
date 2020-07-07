@@ -61,8 +61,8 @@ public class MavrGame extends Game {
         //Create Game table and render
         player1 = new Player("Player1");
         player2 = new Player("Player2");
-        players.add(player1);
         players.add(player2);
+        players.add(player1);
         cardDeck = new CardDeck(players);
         lastCard = cardDeck.shuffleDeckCards.pop();
         cardDeck.playedCards.add(lastCard);

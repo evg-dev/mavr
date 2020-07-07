@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class Card {
 
-    private final Sprite backSprite;
-    private final Sprite topSprite;
+    public final Sprite backSprite;
+    public final Sprite topSprite;
     //    public final Suit suit;
     public Sprite sprite;
     private final MavrGame.Suit suit;
@@ -16,6 +16,7 @@ public class Card {
 
     public float X;
     public float Y;
+    private CardDeck cardDeck;
 
 
     public Card(MavrGame.Suit suit, float X, float Y, boolean turned, int index) {
@@ -45,13 +46,12 @@ public class Card {
     public void setPosition(float X, float Y) {
         if (this.turned) {
             this.backSprite.setPosition(X, Y);
-
         } else {
             this.topSprite.setPosition(X, Y);
         }
     }
 
-    public void update(boolean turned) {
+    public void update() {
         if (this.turned) {
             this.backSprite.setPosition(X, Y);
         } else {
@@ -59,7 +59,7 @@ public class Card {
         }
     }
 
-    public void draw(SpriteBatch spriteBatch) {
+    public void render(SpriteBatch spriteBatch) {
         if (this.turned) {
             this.backSprite.draw(spriteBatch);
         } else {
@@ -68,19 +68,43 @@ public class Card {
     }
 
     public float getX() {
-        return this.sprite.getX();
+        if (this.turned) {
+            return this.backSprite.getX();
+        } else {
+            return this.topSprite.getX();
+        }
     }
 
     public float getY() {
-        return this.sprite.getY();
+        if (this.turned) {
+            return this.backSprite.getY();
+        } else {
+            return this.topSprite.getY();
+        }
     }
 
     public float getWidth() {
-        return this.sprite.getWidth();
+        if (this.turned) {
+            return this.backSprite.getWidth();
+        } else {
+            return this.topSprite.getWidth();
+        }
     }
 
     public float getHeight() {
-        return this.sprite.getHeight();
+        if (this.turned) {
+            return this.backSprite.getHeight();
+        } else {
+            return this.topSprite.getHeight();
+        }
+    }
+
+    public static Card newTopDeck(CardDeck cardDeck, Card topDeck) {
+        topDeck = cardDeck.shuffleDeckCards.peek();
+        topDeck.turned = true;
+        topDeck.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
+        topDeck.setPosition(-1.05f, -0.5f);
+        return topDeck;
     }
 
 //    @Override

@@ -1,15 +1,16 @@
 package ru.mavr;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class GameScreen extends ScreenAdapter {
@@ -21,7 +22,6 @@ public class GameScreen extends ScreenAdapter {
 //
 	public Stack<Player> players;
 	//	private static TextureAtlas atlas;
-	public Card card;
 	private MavrGame game;
 	public CardDeck cardDeck;
 
@@ -30,18 +30,26 @@ public class GameScreen extends ScreenAdapter {
 	SpriteBatch spriteBatch;
 	OrthographicCamera cam;
 	Vector3 touchPos;
-	public Card sprite;
 	public static TextureAtlas atlas;
-	private Card lastPlayedCard;
-	private Card topDeck;
+	public Card sprite;
+	public Card card;
+	public Card lastPlayedCard;
+	public Card topDeck;
+	public Card newTopDeck;
 	int i;
 	int count;
+	private Player player;
 
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, Stack<Player> players) {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
+
+		topDeck = this.cardDeck.shuffleDeckCards.peek();
+		topDeck.turned = true;
+		topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
+		topDeck.setPosition(-1.05f, -0.5f);
 	}
 
 	/**
@@ -52,18 +60,63 @@ public class GameScreen extends ScreenAdapter {
 		return atlas;
 	}
 
+	public void HandleSpriteClick(Card sprite) {
+		// Top deck
+		if (sprite != null) {
+			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
+				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
+					// topDeck
+					player = players.peek();
+					if (sprite == topDeck) {
+						System.out.println("Click Deck");
+						card = cardDeck.getCard();
+						if (card != null) {
+							card.turned = false;
+							player.cards.add(card);
+							topDeck = cardDeck.getCardDeckValue();
+							if (topDeck != null) {
+								topDeck.turned = true;
+								topDeck.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
+								topDeck.setPosition(-1.05f, -0.5f);
+							}
+						}
+					} else {
+						System.out.println("Click");
+						cardDeck.playedCards.push(sprite);
+//						lastPlayedCard = cardDeck.playedCards.peek();
+//						player.cards.clear();
+						player.cards.remove(sprite);
+//						if(lastPlayedCard != null) {
+//							lastPlayedCard.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
+//							lastPlayedCard.setPosition(0.05f, -0.5f);
+//						}
+					}
+
+
+				}
+			}
+		}
+	}
+
+	private void renderTopDeck() {
+		if (cardDeck.shuffleDeckCards != null) {
+			card = cardDeck.getCardDeckValue();
+			if (card != null) {
+				card.turned = true;
+				card.setSize(CARD_WIDTH, CARD_HEIGHT);
+				card.setPosition(-1.05f, -0.5f);
+				card.render(spriteBatch);
+			}
+		}
+	}
+
 	private void renderCard() {
-		// deck
-		topDeck = this.cardDeck.shuffleDeckCards.peek();
-		topDeck.turned = true;
-		topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
-		topDeck.setPosition(-1.05f, -0.5f);
-		topDeck.draw(spriteBatch);
+		renderTopDeck();
 		// played cards
 		lastPlayedCard = this.cardDeck.playedCards.peek();
 		lastPlayedCard.setSize(CARD_WIDTH, CARD_HEIGHT);
 		lastPlayedCard.setPosition(0.05f, -0.5f);
-		lastPlayedCard.draw(spriteBatch);
+		lastPlayedCard.render(spriteBatch);
 
 		i = 0;
 		for (Player player : players
@@ -73,22 +126,24 @@ public class GameScreen extends ScreenAdapter {
 			// for 2 players, TODO: for 4
 			for (Card card : player.cards
 			) {
-				float cardX;
-				if (len <= 4) {
-					cardX = -len / 2 + count;
-				} else {
-					cardX = -2 + 4 / len * count;
-				}
-				card.setSize(CARD_WIDTH, CARD_HEIGHT);
-				if (i == 0) {
-					card.setPosition(cardX, -2);
-				}
+				if (card != null) {
+					float cardX;
+					if (len <= 4) {
+						cardX = -len / 2 + count;
+					} else {
+						cardX = -2 + 4 / len * count;
+					}
+					card.setSize(CARD_WIDTH, CARD_HEIGHT);
+					if (i == 0) {
+						card.setPosition(cardX, 1);
+					}
 
-				if (i == 1) {
-					card.setPosition(cardX, 1);
+					if (i == 1) {
+						card.setPosition(cardX, -2);
+					}
+					card.render(this.spriteBatch);
+					count++;
 				}
-				card.draw(this.spriteBatch);
-				count++;
 			}
 			i++;
 		}
@@ -112,38 +167,24 @@ public class GameScreen extends ScreenAdapter {
 		touchPos = new Vector3();
 		cam = new OrthographicCamera();
 
-//		Gdx.input.setInputProcessor(new InputAdapter() {
-//			public boolean touchUp(int x, int y, int pointer, int button) {
-//				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-//				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-//				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
-//					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
-//						System.out.println("Click sprite");
-
-//						sprite.setPosition(sprite.getX() + 0.5f, -2);
-		//clicked on sprite
-		// do something that vanish the object clicked
-//					}
-//				}
-//				float touchX = temp.x;
-//				float touchY = temp.y;
-//				System.out.println("Touch");
-//				System.out.println(touchPos.x);
-//				System.out.println(sprite.getX());
-//				return false;
-//			}
-
-//			public boolean touchUp(int x,int y,int pointer,int button){
-//				return true; // возвращает true, сообщая, что событие было обработано
-//			}
-//		});
-
+		Gdx.input.setInputProcessor(new InputAdapter() {
+			public boolean touchUp(int x, int y, int pointer, int button) {
+				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
+//				System.out.println("Click");
+				HandleSpriteClick(topDeck);
+				Player player = players.peek();
+//				ArrayList<Card> playerCards = currentPlayer.cards;
+//				ArrayList<Card> playerCards = player.cards;
+				int len = player.cards.size();
+				for (int i = 0; i < len; i++) {
+					card = player.cards.get(i);
+					HandleSpriteClick(card);
+				}
+				return false;
+			}
+		});
 	}
-//	addListener(new ClickListener() {
-//		@Override
-//		public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-
-//			Gdx.input.vibrate(25); // Дадим пользователю понять, что он нажал немного вибрируя в момент касания
 
 	@Override
 	public void dispose() {
@@ -151,7 +192,7 @@ public class GameScreen extends ScreenAdapter {
 		atlas.dispose();
 	}
 
-	//	@Override
+	@Override
 	public void render(float delta) {
 		Gdx.gl.glClearColor(3.9f / 255.0f, 42.0f / 255.0f, 5.1f / 255.0f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

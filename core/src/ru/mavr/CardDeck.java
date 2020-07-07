@@ -28,14 +28,9 @@ public class CardDeck {
         initialCardToPlayers(players);
     }
 
-//        Random rand = new Random();
-//        int randomElement = givenList.get(rand.nextInt(givenList.size()));
-//        System.out.println(deckCards.size());
-
     static public Stack<Card> shuffleDeck(Stack<Card> deckCards) {
         Collections.shuffle(deckCards);
         return deckCards;
-
     }
 
     /**
@@ -48,5 +43,22 @@ public class CardDeck {
                 player.cards.add(this.shuffleDeckCards.pop());
             }
         }
+    }
+
+    public Card getCard() {
+        if (!this.shuffleDeckCards.empty()) {
+            return shuffleDeckCards.pop();
+        } else {
+            return null;
+        }
+    }
+
+    public Card getCardDeckValue() {
+        if (!this.shuffleDeckCards.empty()) {
+            return shuffleDeckCards.peek();
+        } else {
+            return null;
+        }
+
     }
 }

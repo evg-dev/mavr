@@ -2,6 +2,8 @@ package ru.mavr;
 
 import java.util.ArrayList;
 
+import jdk.nashorn.internal.IntDeque;
+
 public class Player {
     public String name;
     public ArrayList<Card> cards;
@@ -17,12 +19,21 @@ public class Player {
         return this.score;
     }
 
-//    public int getCard() {
-//
-//    }
+
+    public Card getCard() {
+        if (!this.cards.isEmpty()) {
+            return cards.get(0);
+        } else {
+            return null;
+        }
+    }
 //
 //    public int pushCard() {
 //
+//    }
+
+//    public Player getPlayer() {
+//        return this.players.pop();
 //    }
 
     /**
