@@ -76,20 +76,12 @@ public class GameScreen extends ScreenAdapter {
 							topDeck = cardDeck.getCardDeckValue();
 							if (topDeck != null) {
 								topDeck.turned = true;
-								topDeck.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
-								topDeck.setPosition(-1.05f, -0.5f);
 							}
 						}
 					} else {
 						System.out.println("Click");
 						cardDeck.playedCards.push(sprite);
-//						lastPlayedCard = cardDeck.playedCards.peek();
-//						player.cards.clear();
 						player.cards.remove(sprite);
-//						if(lastPlayedCard != null) {
-//							lastPlayedCard.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
-//							lastPlayedCard.setPosition(0.05f, -0.5f);
-//						}
 					}
 
 
