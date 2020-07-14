@@ -27,7 +27,17 @@ public class Player {
             return null;
         }
     }
-//
+
+//    public Card getCardByCoordinates(float x, float y) {
+//        float coordinates [][] = {};
+//        for (Card card: this.cards
+//             ) {
+//            coordinates[][x, y];
+//            x = card.getY();
+//            y = card.getY();
+//        return card;
+//    }
+
 //    public int pushCard() {
 //
 //    }

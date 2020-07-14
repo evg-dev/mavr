@@ -67,7 +67,8 @@ public class MavrGame extends Game {
         lastCard = cardDeck.shuffleDeckCards.pop();
         cardDeck.playedCards.add(lastCard);
 
-        this.setScreen(new GameScreen(this, cardDeck, players));
+        this.setScreen(new MenuScreen());
+//        this.setScreen(new GameScreen(this, cardDeck, players));
     }
 
 //	@Override

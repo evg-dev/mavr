@@ -60,7 +60,7 @@ public class GameScreen extends ScreenAdapter {
 		return atlas;
 	}
 
-	public void HandleSpriteClick(Card sprite) {
+	public boolean HandleSpriteClick(Card sprite) {
 		// Top deck
 		if (sprite != null) {
 			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
@@ -68,7 +68,7 @@ public class GameScreen extends ScreenAdapter {
 					// topDeck
 					player = players.peek();
 					if (sprite == topDeck) {
-						System.out.println("Click Deck");
+//						System.out.println("Click Deck");
 						card = cardDeck.getCard();
 						if (card != null) {
 							card.turned = false;
@@ -76,17 +76,45 @@ public class GameScreen extends ScreenAdapter {
 							topDeck = cardDeck.getCardDeckValue();
 							if (topDeck != null) {
 								topDeck.turned = true;
+								return false;
 							}
 						}
-					} else {
-						System.out.println("Click");
-						cardDeck.playedCards.push(sprite);
-						player.cards.remove(sprite);
 					}
-
-
 				}
 			}
+		}
+		return false;
+	}
+
+	public void HandleClick(Player player) {
+		HandleSpriteClick(topDeck);
+		ArrayList<Card> clickedCards = new ArrayList<Card>();
+		int len = player.cards.size();
+		for (int i = 0; i < len; i++) {
+			sprite = player.cards.get(i);
+			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
+				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
+					clickedCards.add(sprite);
+				}
+			}
+		}
+		if (clickedCards.size() > 1) {
+			// Search Card by click coordinates
+			float x1 = clickedCards.get(0).getX();
+			float x2 = clickedCards.get(1).getX();
+			float delta = Math.abs(x1 - x2);
+			for (Card clickedCard : clickedCards
+			) {
+				float x = clickedCard.getX();
+				if (x < touchPos.x && touchPos.x < (x + delta)) {
+					cardDeck.playedCards.add(clickedCard);
+					player.cards.remove(clickedCard);
+					break;
+				}
+			}
+		} else if (clickedCards.size() == 1) {
+			cardDeck.playedCards.add(clickedCards.get(0));
+			player.cards.remove(clickedCards.get(0));
 		}
 	}
 
@@ -164,15 +192,8 @@ public class GameScreen extends ScreenAdapter {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
 //				System.out.println("Click");
-				HandleSpriteClick(topDeck);
 				Player player = players.peek();
-//				ArrayList<Card> playerCards = currentPlayer.cards;
-//				ArrayList<Card> playerCards = player.cards;
-				int len = player.cards.size();
-				for (int i = 0; i < len; i++) {
-					card = player.cards.get(i);
-					HandleSpriteClick(card);
-				}
+				HandleClick(player);
 				return false;
 			}
 		});
