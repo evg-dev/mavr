@@ -8,6 +8,7 @@ public class Card {
 
     public final Sprite backSprite;
     public final Sprite topSprite;
+    private final int value;
     //    public final Suit suit;
     public Sprite sprite;
     private final MavrGame.Suit suit;
@@ -19,10 +20,11 @@ public class Card {
     private CardDeck cardDeck;
 
 
-    public Card(MavrGame.Suit suit, float X, float Y, boolean turned, int index) {
+    public Card(MavrGame.Suit suit, float X, float Y, boolean turned, int index, int value) {
 
         this.atlas = GameScreen.getAtlas();
         this.turned = turned;
+        this.value = value;
         this.suit = suit;
         this.X = X;
         this.Y = Y;
@@ -97,6 +99,14 @@ public class Card {
         } else {
             return this.topSprite.getHeight();
         }
+    }
+
+    public int getValue() {
+        return this.value;
+    }
+
+    public MavrGame.Suit getSuit() {
+        return this.suit;
     }
 
     public static Card newTopDeck(CardDeck cardDeck, Card topDeck) {

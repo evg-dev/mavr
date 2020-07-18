@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import jdk.nashorn.internal.IntDeque;
 
 public class Player {
+    public boolean turn = false;
+    public boolean type = false; // true - human, false - AI
     public String name;
     public ArrayList<Card> cards;
-    private int score;
+    public int score;
 
     Player(String name) {
         this.cards = new ArrayList<Card>();
         this.name = name;
         this.score = 0;
+        this.turn = false;
     }
 
     public int getScore() {
@@ -27,6 +30,14 @@ public class Player {
             return null;
         }
     }
+
+//    public Card getDeckCard() {
+//        if (CardDeck. .isEmpty()) {
+//            return cards.get(0);
+//        } else {
+//            return null;
+//        }
+//    }
 
 //    public Card getCardByCoordinates(float x, float y) {
 //        float coordinates [][] = {};

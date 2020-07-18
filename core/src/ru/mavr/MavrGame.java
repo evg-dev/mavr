@@ -2,26 +2,17 @@ package ru.mavr;
 
 import com.badlogic.gdx.Game;
 
-import ru.mavr.GameScreen;
-
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-
 import java.util.ArrayList;
 import java.util.Stack;
 //import com.badlogic.gdx.Game;
 
 public class MavrGame extends Game {
 
-    private Player player1;
+    private Player player;
     private Player player2;
     public CardDeck cardDeck;
     private Card lastCard;
+    public static int playersCount = 2;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -57,25 +48,29 @@ public class MavrGame extends Game {
 
     @Override
     public void create() {
-        Stack<Player> players = new Stack<Player>();
+        ArrayList<Player> players = new ArrayList<Player>();
         //Create Game table and render
-        player1 = new Player("Player1");
-        player2 = new Player("Player2");
-        players.add(player2);
-        players.add(player1);
+//        player1 = new Player("Player1");
+//        player2 = new Player("Player2");
+//        players.add(player2);
+//        players.add(player1);
+        createPlayers(playersCount, players);
         cardDeck = new CardDeck(players);
         lastCard = cardDeck.shuffleDeckCards.pop();
         cardDeck.playedCards.add(lastCard);
 
-        this.setScreen(new MenuScreen());
-//        this.setScreen(new GameScreen(this, cardDeck, players));
+        this.setScreen(new GameScreen(this, cardDeck, players));
+//        this.setScreen(new MenuScreen());
     }
 
-//	@Override
-//	public void render () {
-//	}
-//
-//	@Override
-//	public void dispose () {
-//	}
+    private void createPlayers(int playersCount, ArrayList<Player> players) {
+        for (int i = 1; i <= playersCount; i++) {
+            player = new Player("Player" + i);
+            if (i == playersCount) {
+                // Human player
+                player.type = true;
+            }
+            players.add(player);
+        }
+    }
 }

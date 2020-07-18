@@ -14,14 +14,14 @@ public class CardDeck {
     public Stack<Card> playedCards;
     MavrGame game;
 
-    CardDeck(Stack<Player> players) {
+    CardDeck(ArrayList<Player> players) {
         this.playedCards = new Stack<Card>();
         Stack<Card> deckCards = new Stack<Card>();
         for (MavrGame.Suit suit : MavrGame.Suit.values()
         ) {
             for (MavrGame.Names name : MavrGame.Names.values()
             ) {
-                deckCards.add(new Card(suit, 0, 0, false, name.atlasIndex));
+                deckCards.add(new Card(suit, 0, 0, false, name.atlasIndex, name.defaultValue));
             }
         }
         shuffleDeckCards = shuffleDeck(deckCards);
@@ -36,7 +36,7 @@ public class CardDeck {
     /**
      * @param players
      */
-    public void initialCardToPlayers(Stack<Player> players) {
+    public void initialCardToPlayers(ArrayList<Player> players) {
         for (int i = 0; i < 4; i++) {
             for (Player player : players
             ) {

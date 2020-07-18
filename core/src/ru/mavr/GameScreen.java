@@ -20,7 +20,7 @@ public class GameScreen extends ScreenAdapter {
 	public final static float MINIMUM_VIEWPORT_SIZE = 5f;
 	//	public static Stack<Player> players;
 //
-	public Stack<Player> players;
+	public ArrayList<Player> players;
 	//	private static TextureAtlas atlas;
 	private MavrGame game;
 	public CardDeck cardDeck;
@@ -39,9 +39,10 @@ public class GameScreen extends ScreenAdapter {
 	int i;
 	int count;
 	private Player player;
+	private MavrGame.Suit suit;
 
 
-	public GameScreen(MavrGame game, CardDeck cardDeck, Stack<Player> players) {
+	public GameScreen(MavrGame game, CardDeck cardDeck, ArrayList<Player> players) {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
@@ -66,7 +67,7 @@ public class GameScreen extends ScreenAdapter {
 			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
 				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
 					// topDeck
-					player = players.peek();
+					player = players.get(MavrGame.playersCount - 1); // Because counter from 0
 					if (sprite == topDeck) {
 //						System.out.println("Click Deck");
 						card = cardDeck.getCard();
@@ -87,34 +88,41 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	public void HandleClick(Player player) {
-		HandleSpriteClick(topDeck);
-		ArrayList<Card> clickedCards = new ArrayList<Card>();
-		int len = player.cards.size();
-		for (int i = 0; i < len; i++) {
-			sprite = player.cards.get(i);
-			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
-				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
-					clickedCards.add(sprite);
+		if (player.turn) {
+			if (HandleSpriteClick(topDeck)) {
+				turnHandling(player);
+			}
+			ArrayList<Card> clickedCards = new ArrayList<Card>();
+			int len = player.cards.size();
+			for (int i = 0; i < len; i++) {
+				sprite = player.cards.get(i);
+				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
+					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
+						clickedCards.add(sprite);
+					}
 				}
 			}
-		}
-		if (clickedCards.size() > 1) {
-			// Search Card by click coordinates
-			float x1 = clickedCards.get(0).getX();
-			float x2 = clickedCards.get(1).getX();
-			float delta = Math.abs(x1 - x2);
-			for (Card clickedCard : clickedCards
-			) {
-				float x = clickedCard.getX();
-				if (x < touchPos.x && touchPos.x < (x + delta)) {
-					cardDeck.playedCards.add(clickedCard);
-					player.cards.remove(clickedCard);
-					break;
+			if (clickedCards.size() > 1) {
+				// Search Card by click coordinates
+				float x1 = clickedCards.get(0).getX();
+				float x2 = clickedCards.get(1).getX();
+				float delta = Math.abs(x1 - x2);
+				for (Card clickedCard : clickedCards
+				) {
+					float x = clickedCard.getX();
+					if (x < touchPos.x && touchPos.x < (x + delta)) {
+						cardDeck.playedCards.add(clickedCard);
+						player.cards.remove(clickedCard);
+						turnHandling(player);
+						break;
+					}
 				}
+			} else if (clickedCards.size() == 1) {
+				cardDeck.playedCards.add(clickedCards.get(0));
+				player.cards.remove(clickedCards.get(0));
+				turnHandling(player);
 			}
-		} else if (clickedCards.size() == 1) {
-			cardDeck.playedCards.add(clickedCards.get(0));
-			player.cards.remove(clickedCards.get(0));
+//			player.turn = false;
 		}
 	}
 
@@ -186,13 +194,16 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch = new SpriteBatch();
 		touchPos = new Vector3();
 		cam = new OrthographicCamera();
+		// Handling init
+		turnHandling(null);
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			public boolean touchUp(int x, int y, int pointer, int button) {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
 //				System.out.println("Click");
-				Player player = players.peek();
+//				Player player = players.peek();
+				player = getPlayer(players, MavrGame.playersCount);
 				HandleClick(player);
 				return false;
 			}
@@ -213,5 +224,86 @@ public class GameScreen extends ScreenAdapter {
 		spriteBatch.begin();
 		renderCard();
 		spriteBatch.end();
+	}
+
+	/**
+	 * @param players
+	 * @param i       int
+	 * @return player for 0 counter
+	 */
+	private static Player getPlayer(ArrayList<Player> players, int i) {
+		return players.get(i - 1);
+	}
+
+	private void turnHandling(Player player) {
+		int playersCount = MavrGame.playersCount;
+		int counter = 2;
+		// Message on screen?
+		// First turn
+		if (player == null) {
+			Player currentPlayer = getPlayer(players, counter);
+			currentPlayer.turn = true;
+			if (!currentPlayer.type) {
+				aiTurn(currentPlayer);
+			}
+		} else {
+			player.turn = false;
+			// Game logic method
+			logicHandler(lastPlayedCard, counter);
+			if (player.cards.size() == 0) {
+				for (Player countedPlayer : players
+				) {
+					for (Card card : countedPlayer.cards
+					) {
+						int value = card.getValue();
+						player.score += value;
+					}
+				}
+				// Stop game
+				// Winner message
+				// Save score
+			}
+			counter++;
+			int newCounter;
+			if (counter > playersCount) {
+				newCounter = counter - playersCount;
+			} else {
+				newCounter = counter;
+			}
+			Player nextPlayer = getPlayer(players, newCounter);
+			nextPlayer.turn = true;
+			if (!nextPlayer.type) {
+				aiTurn(nextPlayer);
+			}
+		}
+	}
+
+	private void aiTurn(Player player) {
+		if (player.turn) {
+			// TODO: Add AI Logic here
+			card = player.cards.remove(0);
+			card.turned = false;
+			cardDeck.playedCards.add(card);
+			turnHandling(player);
+		}
+	}
+
+	private void logicHandler(Card lastPlayedCard, int counter) {
+		int value = lastPlayedCard.getValue();
+		suit = lastPlayedCard.getSuit();
+		// A
+		if (value == 11) {
+			counter++;
+		}
+		// K SPADES
+		if (value == 4 && suit == MavrGame.Suit.SPADES) {
+			Player nextPlayer = getPlayer(players, counter++);
+			nextPlayer.cards.add(cardDeck.getCard());
+			nextPlayer.cards.add(cardDeck.getCard());
+			nextPlayer.cards.add(cardDeck.getCard());
+			nextPlayer.cards.add(cardDeck.getCard());
+			counter++;
+		}
+
 	}
 }
