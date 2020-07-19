@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Stack;
 
 public class CardDeck {
-    private Stack<Player> players;
+    public ArrayList<Player> players;
     private static Stack<Card> cardShuffle;
     private Stack<Card> retreatCards;
     private ArrayList<Card> deckCardsArray;
@@ -47,6 +47,15 @@ public class CardDeck {
 
     public Card getCard() {
         if (!this.shuffleDeckCards.empty()) {
+            if (this.shuffleDeckCards.size() == 1) {
+                // Last card shuffle deck
+                // Show message
+                Card lastDeckCard = shuffleDeckCards.pop();
+                Card lastPlayedCard = this.playedCards.pop();
+                this.shuffleDeckCards = shuffleDeck(this.playedCards);
+                this.playedCards.push(lastPlayedCard);
+                return lastDeckCard;
+            }
             return shuffleDeckCards.pop();
         } else {
             return null;

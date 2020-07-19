@@ -11,18 +11,19 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 public class GameScreen extends ScreenAdapter {
 
 	public final static float CARD_WIDTH = 0.75f;
 	public final static float CARD_HEIGHT = CARD_WIDTH * 277f / 200f;
 	public final static float MINIMUM_VIEWPORT_SIZE = 5f;
+	public int currentPlayerIndex;
 	//	public static Stack<Player> players;
 //
 	public ArrayList<Player> players;
 	//	private static TextureAtlas atlas;
 	private MavrGame game;
+	private GameScreen gameScreen;
 	public CardDeck cardDeck;
 
 	private TextButton drawCardButton;
@@ -40,12 +41,14 @@ public class GameScreen extends ScreenAdapter {
 	int count;
 	private Player player;
 	private MavrGame.Suit suit;
+	public Player currentPlayer;
 
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, ArrayList<Player> players) {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
+		this.currentPlayerIndex = MavrGame.playersCount - 1;
 
 		topDeck = this.cardDeck.shuffleDeckCards.peek();
 		topDeck.turned = true;
@@ -67,7 +70,7 @@ public class GameScreen extends ScreenAdapter {
 			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
 				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
 					// topDeck
-					player = players.get(MavrGame.playersCount - 1); // Because counter from 0
+					player = this.players.get(MavrGame.playersCount - 1); // Because counter from 0
 					if (sprite == topDeck) {
 //						System.out.println("Click Deck");
 						card = cardDeck.getCard();
@@ -77,7 +80,7 @@ public class GameScreen extends ScreenAdapter {
 							topDeck = cardDeck.getCardDeckValue();
 							if (topDeck != null) {
 								topDeck.turned = true;
-								return false;
+								return true;
 							}
 						}
 					}
@@ -88,9 +91,13 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	public void HandleClick(Player player) {
+//		System.out.println("Click");
 		if (player.turn) {
-			if (HandleSpriteClick(topDeck)) {
-				turnHandling(player);
+			boolean deckClick = HandleSpriteClick(topDeck);
+			if (deckClick) {
+				turnHandling();
+				System.out.println(this.currentPlayerIndex + " currentPlayerIndex 2");
+				System.out.println(this.currentPlayer.toString() + "Click 2");
 			}
 			ArrayList<Card> clickedCards = new ArrayList<Card>();
 			int len = player.cards.size();
@@ -113,16 +120,21 @@ public class GameScreen extends ScreenAdapter {
 					if (x < touchPos.x && touchPos.x < (x + delta)) {
 						cardDeck.playedCards.add(clickedCard);
 						player.cards.remove(clickedCard);
-						turnHandling(player);
+//						turnHandling(player);
 						break;
 					}
 				}
 			} else if (clickedCards.size() == 1) {
 				cardDeck.playedCards.add(clickedCards.get(0));
 				player.cards.remove(clickedCards.get(0));
-				turnHandling(player);
+//				turnHandling(player);
 			}
-//			player.turn = false;
+//			this.currentPlayerIndex++;
+//			if (this.currentPlayerIndex > MavrGame.playersCount) {
+//				this.currentPlayerIndex -= MavrGame.playersCount;
+//			}
+//			Player nextPlayer = this.players.get(this.currentPlayerIndex - 1);
+//			nextPlayer.turn = true;
 		}
 	}
 
@@ -147,7 +159,7 @@ public class GameScreen extends ScreenAdapter {
 		lastPlayedCard.render(spriteBatch);
 
 		i = 0;
-		for (Player player : players
+		for (Player player : this.players
 		) {
 			float len = player.cards.size();
 			count = 0;
@@ -195,19 +207,23 @@ public class GameScreen extends ScreenAdapter {
 		touchPos = new Vector3();
 		cam = new OrthographicCamera();
 		// Handling init
-		turnHandling(null);
-
+		System.out.println(this.currentPlayerIndex + " currentPlayerIndex");
+//		System.out.println(this.currentPlayer.toString() + "Click");
+		this.currentPlayer = this.players.get(this.currentPlayerIndex);
+		this.currentPlayer.turn = true;
+//		if(this.currentPlayer.type) {
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			public boolean touchUp(int x, int y, int pointer, int button) {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-//				System.out.println("Click");
-//				Player player = players.peek();
-				player = getPlayer(players, MavrGame.playersCount);
-				HandleClick(player);
+				//				System.out.println("Click");
+				//				Player player = players.peek();
+				Player humanPlayer = game.gameScreen.players.get(MavrGame.playersCount - 1);
+				HandleClick(humanPlayer);
 				return false;
 			}
 		});
+//		}
 	}
 
 	@Override
@@ -227,64 +243,77 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	/**
-	 * @param players
-	 * @param i       int
 	 * @return player for 0 counter
 	 */
-	private static Player getPlayer(ArrayList<Player> players, int i) {
-		return players.get(i - 1);
-	}
 
-	private void turnHandling(Player player) {
-		int playersCount = MavrGame.playersCount;
-		int counter = 2;
-		// Message on screen?
-		// First turn
-		if (player == null) {
-			Player currentPlayer = getPlayer(players, counter);
-			currentPlayer.turn = true;
-			if (!currentPlayer.type) {
-				aiTurn(currentPlayer);
-			}
-		} else {
-			player.turn = false;
-			// Game logic method
-			logicHandler(lastPlayedCard, counter);
-			if (player.cards.size() == 0) {
-				for (Player countedPlayer : players
-				) {
-					for (Card card : countedPlayer.cards
-					) {
-						int value = card.getValue();
-						player.score += value;
-					}
-				}
-				// Stop game
-				// Winner message
-				// Save score
-			}
-			counter++;
-			int newCounter;
-			if (counter > playersCount) {
-				newCounter = counter - playersCount;
-			} else {
-				newCounter = counter;
-			}
-			Player nextPlayer = getPlayer(players, newCounter);
-			nextPlayer.turn = true;
-			if (!nextPlayer.type) {
-				aiTurn(nextPlayer);
-			}
+	private void turnHandling() {
+		this.currentPlayer.turn = false;
+		this.currentPlayerIndex++;
+		if (this.currentPlayerIndex > MavrGame.playersCount - 1) {
+			this.currentPlayerIndex -= MavrGame.playersCount;
 		}
-	}
+		this.currentPlayer = this.players.get(currentPlayerIndex);
+		this.currentPlayer.turn = true;
+		if (!this.currentPlayer.type) {
+			aiTurn();
+			turnHandling();
+		}
 
-	private void aiTurn(Player player) {
-		if (player.turn) {
+
+	}
+//		int playersCount = MavrGame.playersCount;
+//		int counter = 2;
+//		// Message on screen?
+//		// First turn
+//		if (player == null) {
+//			Player currentPlayer = this.getPlayer(counter);
+//			currentPlayer.turn = true;
+//			if (!currentPlayer.type) {
+//				aiTurn(currentPlayer);
+//			}
+//		} else {
+//			player.turn = false;
+//			// Game logic method
+//			logicHandler(lastPlayedCard, counter);
+//			if (player.cards.size() == 0) {
+//				for (Player countedPlayer : this.players
+//				) {
+//					for (Card card : countedPlayer.cards
+//					) {
+//						int value = card.getValue();
+//						player.score += value;
+//					}
+//				}
+//				// Stop game
+//				// Winner message
+//				// Save score
+//			}
+//			counter++;
+//			int newCounter;
+//			if (counter > playersCount) {
+//				newCounter = counter - playersCount;
+//			} else {
+//				newCounter = counter;
+//			}
+////			Player nextPlayer = this.getPlayer(newCounter);
+//			Player nextPlayer = this.players.get(newCounter - 1);
+//			nextPlayer.turn = true;
+//			if (!nextPlayer.type) {
+//				card = nextPlayer.cards.remove(0);
+//				card.turned = false;
+//			}
+//			turnHandling(nextPlayer);
+//		}
+//	}
+
+	public void aiTurn() {
+//		player = this.players.get();
+		if (this.currentPlayer.turn) {
 			// TODO: Add AI Logic here
-			card = player.cards.remove(0);
+			card = this.currentPlayer.cards.remove(0);
 			card.turned = false;
 			cardDeck.playedCards.add(card);
-			turnHandling(player);
+			this.currentPlayer.turn = false;
 		}
 	}
 
@@ -297,7 +326,7 @@ public class GameScreen extends ScreenAdapter {
 		}
 		// K SPADES
 		if (value == 4 && suit == MavrGame.Suit.SPADES) {
-			Player nextPlayer = getPlayer(players, counter++);
+			Player nextPlayer = this.getPlayer(counter++);
 			nextPlayer.cards.add(cardDeck.getCard());
 			nextPlayer.cards.add(cardDeck.getCard());
 			nextPlayer.cards.add(cardDeck.getCard());
@@ -305,5 +334,10 @@ public class GameScreen extends ScreenAdapter {
 			counter++;
 		}
 
+	}
+
+	public Player getPlayer(int i) {
+//		System.out.println("ddd " + players.toString());
+		return this.players.get(i - 1);
 	}
 }

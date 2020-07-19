@@ -13,6 +13,7 @@ public class MavrGame extends Game {
     public CardDeck cardDeck;
     private Card lastCard;
     public static int playersCount = 2;
+    public GameScreen gameScreen;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -58,8 +59,8 @@ public class MavrGame extends Game {
         cardDeck = new CardDeck(players);
         lastCard = cardDeck.shuffleDeckCards.pop();
         cardDeck.playedCards.add(lastCard);
-
-        this.setScreen(new GameScreen(this, cardDeck, players));
+        gameScreen = new GameScreen(this, cardDeck, players);
+        this.setScreen(gameScreen);
 //        this.setScreen(new MenuScreen());
     }
 
