@@ -20,9 +20,9 @@ public class InputManager extends InputAdapter {
         camera.unproject(temp);
         float touchX = temp.x;
         float touchY = temp.y;
-        System.out.println("Touch");
-        System.out.println(touchX);
-        System.out.println(touchY);
+//        System.out.println("Touch");
+//        System.out.println(touchX);
+//        System.out.println(touchY);
         return false;
 
     }

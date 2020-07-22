@@ -3,16 +3,13 @@ package ru.mavr;
 import com.badlogic.gdx.Game;
 
 import java.util.ArrayList;
-import java.util.Stack;
-//import com.badlogic.gdx.Game;
 
 public class MavrGame extends Game {
 
     private Player player;
-    private Player player2;
     public CardDeck cardDeck;
     private Card lastCard;
-    public static int playersCount = 2;
+    public static int playersCount = 4;
     public GameScreen gameScreen;
 
     public enum Suit {
@@ -51,16 +48,13 @@ public class MavrGame extends Game {
     public void create() {
         ArrayList<Player> players = new ArrayList<Player>();
         //Create Game table and render
-//        player1 = new Player("Player1");
-//        player2 = new Player("Player2");
-//        players.add(player2);
-//        players.add(player1);
         createPlayers(playersCount, players);
         cardDeck = new CardDeck(players);
         lastCard = cardDeck.shuffleDeckCards.pop();
         cardDeck.playedCards.add(lastCard);
         gameScreen = new GameScreen(this, cardDeck, players);
         this.setScreen(gameScreen);
+
 //        this.setScreen(new MenuScreen());
     }
 

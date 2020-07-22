@@ -46,17 +46,26 @@ public class CardDeck {
     }
 
     public Card getCard() {
+        System.out.println("shuffleDeckCards :" + this.shuffleDeckCards.size());
+        System.out.println("playedCards : " + this.playedCards.size());
         if (!this.shuffleDeckCards.empty()) {
             if (this.shuffleDeckCards.size() == 1) {
                 // Last card shuffle deck
                 // Show message
-                Card lastDeckCard = shuffleDeckCards.pop();
+                Card lastDeckCard = this.shuffleDeckCards.pop();
                 Card lastPlayedCard = this.playedCards.pop();
-                this.shuffleDeckCards = shuffleDeck(this.playedCards);
-                this.playedCards.push(lastPlayedCard);
+
+                Stack<Card> newDeck = new Stack<Card>();
+                newDeck.addAll(this.playedCards);
+
+                this.playedCards.removeAllElements();
+//                lastPlayedCard.turned = false;
+                this.playedCards.add(lastPlayedCard);
+                this.shuffleDeckCards = shuffleDeck(newDeck);
+//                this.playedCards.push(lastPlayedCard);
                 return lastDeckCard;
             }
-            return shuffleDeckCards.pop();
+            return this.shuffleDeckCards.pop();
         } else {
             return null;
         }
