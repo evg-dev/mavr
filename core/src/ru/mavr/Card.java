@@ -33,10 +33,6 @@ public class Card {
         this.topSprite = this.atlas.createSprite(suit.suitName, index);
     }
 
-//    public Card(Card.Suit diamonds, int x, int y, boolean turned, int index) {
-//    }
-
-
     public void setSize(float cardWidth, float cardHeight) {
         if (this.turned) {
             this.backSprite.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
@@ -109,13 +105,32 @@ public class Card {
         return this.suit;
     }
 
-    public static Card newTopDeck(CardDeck cardDeck, Card topDeck) {
-        topDeck = cardDeck.shuffleDeckCards.peek();
-        topDeck.turned = true;
-        topDeck.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
-        topDeck.setPosition(-1.05f, -0.5f);
-        return topDeck;
+    public int countPoint() {
+        int result = 0;
+
+        int value = this.getValue();
+        MavrGame.Suit suit = this.getSuit();
+
+
+        // Queen
+//        if(value == 3) {
+//            if(suit == MavrGame.Suit.DIAMONDS) {
+//                result = 40;
+//            }
+//            result = 20;
+//        }
+
+
+        return value;
     }
+
+//    public static Card newTopDeck(CardDeck cardDeck, Card topDeck) {
+//        topDeck = cardDeck.shuffleDeckCards.peek();
+//        topDeck.turned = true;
+//        topDeck.setSize(GameScreen.CARD_WIDTH, GameScreen.CARD_HEIGHT);
+//        topDeck.setPosition(-1.05f, -0.5f);
+//        return topDeck;
+//    }
 
 //    @Override
 //    public void draw(SpriteBatch batch){

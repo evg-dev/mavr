@@ -22,7 +22,6 @@ public class Player {
         return this.score;
     }
 
-
     public Card getCard() {
         if (!this.cards.isEmpty()) {
             return cards.get(0);

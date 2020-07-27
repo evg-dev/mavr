@@ -6,10 +6,8 @@ import java.util.ArrayList;
 
 public class MavrGame extends Game {
 
-    private Player player;
     public CardDeck cardDeck;
-    private Card lastCard;
-    public static int playersCount = 4;
+    public static int playersCount = 2;
     public GameScreen gameScreen;
 
     public enum Suit {
@@ -26,7 +24,7 @@ public class MavrGame extends Game {
         Six("6", 6, 6),
         Seven("7", 7, 7),
         Eight("8", 8, 8),
-        Nine("9", 9, 9),
+        Nine("9", 0, 9), // Nine is zero!!!
         Ten("10", 10, 10),
         Jack("J", 2, 11),
         Queen("Q", 3, 12),
@@ -50,7 +48,8 @@ public class MavrGame extends Game {
         //Create Game table and render
         createPlayers(playersCount, players);
         cardDeck = new CardDeck(players);
-        lastCard = cardDeck.shuffleDeckCards.pop();
+        Card lastCard = this.cardDeck.shuffleDeckCards.pop();
+        // TODO: first playedCards from player
         cardDeck.playedCards.add(lastCard);
         gameScreen = new GameScreen(this, cardDeck, players);
         this.setScreen(gameScreen);
@@ -60,7 +59,7 @@ public class MavrGame extends Game {
 
     private void createPlayers(int playersCount, ArrayList<Player> players) {
         for (int i = 1; i <= playersCount; i++) {
-            player = new Player("Player" + i);
+            Player player = new Player("Player" + i);
             if (i == playersCount) {
                 // Human player
                 player.type = true;

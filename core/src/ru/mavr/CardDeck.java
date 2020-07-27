@@ -40,7 +40,11 @@ public class CardDeck {
         for (int i = 0; i < 4; i++) {
             for (Player player : players
             ) {
-                player.cards.add(this.shuffleDeckCards.pop());
+                Card card = this.shuffleDeckCards.pop();
+                if (!player.type) {
+                    card.turned = true;
+                }
+                player.cards.add(card);
             }
         }
     }
