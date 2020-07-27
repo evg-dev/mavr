@@ -9,6 +9,7 @@ public class MavrGame extends Game {
     public CardDeck cardDeck;
     public static int playersCount = 2;
     public GameScreen gameScreen;
+    private MenuScreen menuScreen;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -51,11 +52,15 @@ public class MavrGame extends Game {
         Card lastCard = this.cardDeck.shuffleDeckCards.pop();
         // TODO: first playedCards from player
         cardDeck.playedCards.add(lastCard);
-        gameScreen = new GameScreen(this, cardDeck, players);
-        this.setScreen(gameScreen);
-
-//        this.setScreen(new MenuScreen());
+        this.gameScreen = new GameScreen(this, cardDeck, players);
+//        this.setScreen(gameScreen);
+        menuScreen = new MenuScreen(this);
+        this.setScreen(menuScreen);
     }
+
+//    private void createNewGame() {
+//
+//    }
 
     private void createPlayers(int playersCount, ArrayList<Player> players) {
         for (int i = 1; i <= playersCount; i++) {
