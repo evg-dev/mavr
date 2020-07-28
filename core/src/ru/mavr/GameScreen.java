@@ -1,6 +1,7 @@
 package ru.mavr;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
@@ -20,7 +21,7 @@ public class GameScreen extends ScreenAdapter {
 	public GameLogic gameLogic;
 	public int currentPlayerIndex;
 	public ArrayList<Player> players;
-	private MavrGame game;
+	public MavrGame game;
 	public CardDeck cardDeck;
 
 	SpriteBatch spriteBatch;
@@ -256,74 +257,6 @@ public class GameScreen extends ScreenAdapter {
 		}
 	}
 
-	@Override
-	public void resize(int width, int height) {
-		this.width = width;
-		this.height = height;
-		if (width > height) {
-			cam.viewportHeight = MINIMUM_VIEWPORT_SIZE;
-			cam.viewportWidth = cam.viewportHeight * (float) width / (float) height;
-		} else {
-			cam.viewportWidth = MINIMUM_VIEWPORT_SIZE;
-			cam.viewportHeight = cam.viewportWidth * (float) height / (float) width;
-		}
-		textCam.viewportWidth = width;
-		textCam.viewportHeight = height;
-
-		cam.update();
-		textCam.update();
-	}
-
-	@Override
-	public void show() {
-		this.spriteBatch = new SpriteBatch();
-		touchPos = new Vector3();
-		cam = new OrthographicCamera();
-		textCam = new OrthographicCamera();
-//		System.out.println(this.currentPlayerIndex + " currentPlayerIndex");
-//		System.out.println(this.currentPlayer.toString() + "Click");
-		this.currentPlayer = this.players.get(this.currentPlayerIndex);
-		this.currentPlayer.turn = true;
-		if (this.currentPlayer.type) {
-			Gdx.input.setInputProcessor(new InputAdapter() {
-				public boolean touchUp(int x, int y, int pointer, int button) {
-					touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-					cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-					//				System.out.println("Click");
-					//				Player player = players.peek();
-					Player humanPlayer = game.gameScreen.players.get(MavrGame.playersCount - 1);
-					HandleClick(humanPlayer);
-					return false;
-				}
-			});
-		}
-	}
-
-	@Override
-	public void dispose() {
-		this.spriteBatch.dispose();
-		atlas.dispose();
-		font.dispose();
-//		generator.dispose();
-	}
-
-	@Override
-	public void render(float delta) {
-		Gdx.gl.glClearColor(3.9f / 255.0f, 42.0f / 255.0f, 5.1f / 255.0f, 1.0f);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		this.spriteBatch.begin();
-		this.spriteBatch.setProjectionMatrix(cam.combined);
-		renderCard();
-//		this.spriteBatch.setProjectionMatrix(textCam.combined);
-//		RenderText renderText = new RenderText(height, width, this.players);
-//		renderText.draw(this.spriteBatch);
-		this.spriteBatch.end();
-	}
-
-	/**
-	 * @return player for 0 counter
-	 */
-
 	private void turnHandling() {
 		this.currentPlayer.turn = false;
 		if (checkEndRound()) {
@@ -378,4 +311,77 @@ public class GameScreen extends ScreenAdapter {
 //		System.out.println("ddd " + players.toString());
 //		return this.players.get(i - 1);
 //	}
+
+	@Override
+	public void resize(int width, int height) {
+		this.width = width;
+		this.height = height;
+		if (width > height) {
+			cam.viewportHeight = MINIMUM_VIEWPORT_SIZE;
+			cam.viewportWidth = cam.viewportHeight * (float) width / (float) height;
+		} else {
+			cam.viewportWidth = MINIMUM_VIEWPORT_SIZE;
+			cam.viewportHeight = cam.viewportWidth * (float) height / (float) width;
+		}
+		textCam.viewportWidth = width;
+		textCam.viewportHeight = height;
+
+		cam.update();
+		textCam.update();
+	}
+
+	@Override
+	public void show() {
+		this.spriteBatch = new SpriteBatch();
+		touchPos = new Vector3();
+		cam = new OrthographicCamera();
+		textCam = new OrthographicCamera();
+//		System.out.println(this.currentPlayerIndex + " currentPlayerIndex");
+//		System.out.println(this.currentPlayer.toString() + "Click");
+		this.currentPlayer = this.players.get(this.currentPlayerIndex);
+		this.currentPlayer.turn = true;
+//		Gdx.input.setCatchKey(Input.Keys.BACK, true);// setCatchBackKey(true);
+		if (this.currentPlayer.type) {
+			Gdx.input.setInputProcessor(new InputAdapter() {
+				public boolean touchUp(int x, int y, int pointer, int button) {
+					touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+					cam.unproject(touchPos); // calibrates the input to your camera's dimentions
+					//				System.out.println("Click");
+					//				Player player = players.peek();
+					Player humanPlayer = game.gameScreen.players.get(MavrGame.playersCount - 1);
+					HandleClick(humanPlayer);
+					return false;
+				}
+
+				public boolean keyUp(int keycode) {
+					if (keycode == Input.Keys.BACK) {
+						// Back to menu
+						game.setScreen(game.menuScreen);
+					}
+					return false;
+				}
+			});
+		}
+	}
+
+	@Override
+	public void dispose() {
+		this.spriteBatch.dispose();
+		atlas.dispose();
+		font.dispose();
+//		generator.dispose();
+	}
+
+	@Override
+	public void render(float delta) {
+		Gdx.gl.glClearColor(3.9f / 255.0f, 42.0f / 255.0f, 5.1f / 255.0f, 1.0f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		this.spriteBatch.begin();
+		this.spriteBatch.setProjectionMatrix(cam.combined);
+		renderCard();
+//		this.spriteBatch.setProjectionMatrix(textCam.combined);
+//		RenderText renderText = new RenderText(height, width, this.players);
+//		renderText.draw(this.spriteBatch);
+		this.spriteBatch.end();
+	}
 }

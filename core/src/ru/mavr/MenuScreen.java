@@ -2,6 +2,7 @@ package ru.mavr;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
@@ -49,7 +50,6 @@ public class MenuScreen extends ScreenAdapter {
 		textButtonStyle = new TextButton.TextButtonStyle();
 		textButtonStyle.font = font;
 
-
 		continueGame = new TextButton("Continue", textButtonStyle);
 		continueGame.setPosition(-continueGame.getWidth() / 2, this.height / 2 - 100);
 
@@ -84,6 +84,14 @@ public class MenuScreen extends ScreenAdapter {
 						game.setScreen(game.gameScreen);
 						System.out.println("OK");
 					}
+				}
+				return false;
+			}
+
+			public boolean keyUp(int keycode) {
+				if (keycode == Input.Keys.BACK) {
+					// Exit
+					Gdx.app.exit();
 				}
 				return false;
 			}

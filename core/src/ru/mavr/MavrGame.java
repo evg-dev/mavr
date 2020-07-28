@@ -1,6 +1,8 @@
 package ru.mavr;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 
 import java.util.ArrayList;
 
@@ -9,7 +11,7 @@ public class MavrGame extends Game {
     public CardDeck cardDeck;
     public static int playersCount = 2;
     public GameScreen gameScreen;
-    private MenuScreen menuScreen;
+    public MenuScreen menuScreen;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -45,6 +47,7 @@ public class MavrGame extends Game {
 
     @Override
     public void create() {
+        Gdx.input.setCatchKey(Input.Keys.BACK, true);// Override system back
         ArrayList<Player> players = new ArrayList<Player>();
         //Create Game table and render
         createPlayers(playersCount, players);
@@ -53,9 +56,9 @@ public class MavrGame extends Game {
         // TODO: first playedCards from player
         cardDeck.playedCards.add(lastCard);
         this.gameScreen = new GameScreen(this, cardDeck, players);
-//        this.setScreen(gameScreen);
         menuScreen = new MenuScreen(this);
         this.setScreen(menuScreen);
+//        this.setScreen(gameScreen);
     }
 
 //    private void createNewGame() {
