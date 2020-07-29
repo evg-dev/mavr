@@ -17,19 +17,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 public class MenuScreen extends ScreenAdapter {
 
 	private final TextButton.TextButtonStyle textButtonStyle;
-	private final BitmapFont font;
+	public BitmapFont font;
 	private final TextButton continueGame;
 	private final TextButton statistic;
 	private final TextButton newGame;
 	private final TextButton settings;
 	private final TextButton exit;
 	private final FreeTypeFontGenerator generator;
+	public MavrGame game;
 	private Camera cam;
 	private SpriteBatch spriteBatch;
 	private Vector3 touchPos;
-	private float width;
-	private float height;
-	public MavrGame game;
+	public float width;
+	public float height;
 
 
 	public MenuScreen(MavrGame game) {
@@ -40,7 +40,10 @@ public class MenuScreen extends ScreenAdapter {
 //		skin.addRegions(buttonAtlas);
 		this.width = Gdx.graphics.getWidth();
 		this.height = Gdx.graphics.getHeight();
-		;
+
+		this.spriteBatch = new SpriteBatch();
+		this.touchPos = new Vector3();
+		this.cam = new OrthographicCamera();
 
 		generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/AeroMaticsRegular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -68,23 +71,39 @@ public class MenuScreen extends ScreenAdapter {
 
 	@Override
 	public void show() {
-		spriteBatch = new SpriteBatch();
-		touchPos = new Vector3();
-		cam = new OrthographicCamera();
+//		spriteBatch = this.spriteBatch;
+//		touchPos = new Vector3();
+//		cam = new OrthographicCamera();
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 
 			public boolean touchUp(int x, int y, int pointer, int button) {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				cam.unproject(touchPos); // calibrates the input to your camera's dimentions
-				TextButton sprite = newGame;
-				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
-					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
-						System.out.println("newGame");
+
+				// continueGame;
+				if (touchPos.x > continueGame.getX() && touchPos.x < continueGame.getX() + continueGame.getWidth()) {
+					if (touchPos.y > continueGame.getY() && touchPos.y < continueGame.getY() + continueGame.getHeight()) {
 						game.setScreen(game.gameScreen);
-						System.out.println("OK");
 					}
 				}
+
+				// newGame;
+				if (touchPos.x > newGame.getX() && touchPos.x < newGame.getX() + newGame.getWidth()) {
+					if (touchPos.y > newGame.getY() && touchPos.y < newGame.getY() + newGame.getHeight()) {
+						// TODO: new game
+						game = new MavrGame();
+						game.setScreen(game.gameScreen);
+					}
+				}
+
+				if (touchPos.x > settings.getX() && touchPos.x < settings.getX() + settings.getWidth()) {
+					if (touchPos.y > settings.getY() && touchPos.y < settings.getY() + settings.getHeight()) {
+						game.setScreen(game.settigsScreen);
+					}
+				}
+
+
 				return false;
 			}
 

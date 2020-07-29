@@ -1,0 +1,11 @@
+{
+  "com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle": {
+    "default": {
+      "font": "font",
+      "fontColor": "dark-cyan",
+      "background": "select-box",
+      "scrollStyle": "scroll",
+      "listStyle": "plain"
+    }
+  }
+}

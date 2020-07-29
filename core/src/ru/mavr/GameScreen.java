@@ -46,7 +46,7 @@ public class GameScreen extends ScreenAdapter {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
-		this.currentPlayerIndex = MavrGame.playersCount - 1; // Default player begin, after to settings
+		this.currentPlayerIndex = game.playersCount - 1; // Default player begin, after to settings
 		this.gameLogic = new GameLogic(this.game);
 
 		topDeck = this.cardDeck.shuffleDeckCards.peek();
@@ -69,7 +69,7 @@ public class GameScreen extends ScreenAdapter {
 			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
 				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
 					// topDeck
-					player = this.players.get(MavrGame.playersCount - 1); // Because counter from 0
+					player = this.players.get(game.playersCount - 1); // Because counter from 0
 					if (sprite == topDeck) {
 //						System.out.println("Click Deck");
 						card = cardDeck.getCard();
@@ -262,7 +262,7 @@ public class GameScreen extends ScreenAdapter {
 		if (checkEndRound()) {
 			// Refresh counted
 			// TODO: random first turn
-			this.currentPlayerIndex = MavrGame.playersCount - 1;
+			this.currentPlayerIndex = game.playersCount - 1;
 			this.currentPlayer = this.players.get(this.currentPlayerIndex);
 			this.currentPlayer.turn = true;
 			if (!this.currentPlayer.type) {
@@ -271,8 +271,8 @@ public class GameScreen extends ScreenAdapter {
 			}
 		} else {
 			this.currentPlayerIndex++;
-			if (this.currentPlayerIndex > MavrGame.playersCount - 1) {
-				this.currentPlayerIndex -= MavrGame.playersCount;
+			if (this.currentPlayerIndex > game.playersCount - 1) {
+				this.currentPlayerIndex -= game.playersCount;
 			}
 			this.currentPlayer = this.players.get(currentPlayerIndex);
 			this.currentPlayer.turn = true;
@@ -348,7 +348,7 @@ public class GameScreen extends ScreenAdapter {
 					cam.unproject(touchPos); // calibrates the input to your camera's dimentions
 					//				System.out.println("Click");
 					//				Player player = players.peek();
-					Player humanPlayer = game.gameScreen.players.get(MavrGame.playersCount - 1);
+					Player humanPlayer = game.gameScreen.players.get(game.playersCount - 1);
 					HandleClick(humanPlayer);
 					return false;
 				}

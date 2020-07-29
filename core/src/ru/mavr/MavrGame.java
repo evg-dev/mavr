@@ -9,9 +9,10 @@ import java.util.ArrayList;
 public class MavrGame extends Game {
 
     public CardDeck cardDeck;
-    public static int playersCount = 2;
+    public int playersCount;
     public GameScreen gameScreen;
     public MenuScreen menuScreen;
+    public SettingsScreen settigsScreen;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -47,16 +48,18 @@ public class MavrGame extends Game {
 
     @Override
     public void create() {
+        this.playersCount = 2;
         Gdx.input.setCatchKey(Input.Keys.BACK, true);// Override system back
         ArrayList<Player> players = new ArrayList<Player>();
         //Create Game table and render
-        createPlayers(playersCount, players);
+        createPlayers(this.playersCount, players);
         cardDeck = new CardDeck(players);
         Card lastCard = this.cardDeck.shuffleDeckCards.pop();
         // TODO: first playedCards from player
         cardDeck.playedCards.add(lastCard);
         this.gameScreen = new GameScreen(this, cardDeck, players);
-        menuScreen = new MenuScreen(this);
+        this.menuScreen = new MenuScreen(this);
+        this.settigsScreen = new SettingsScreen(this);
         this.setScreen(menuScreen);
 //        this.setScreen(gameScreen);
     }

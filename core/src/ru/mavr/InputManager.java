@@ -10,12 +10,13 @@ public class InputManager extends InputAdapter {
 
     }
 
-    /*@Override
+    @Override
     public boolean keyUp(int keycode) {
-        if(keycode== Input.Keys.BACK){
+        if (keycode == Input.Keys.BACK) {
             System.out.println("Back press");
             game.setScreen(game.menuScreen);
         }
         return false;
-    }*/
+
+    }
 }
