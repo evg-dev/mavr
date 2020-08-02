@@ -77,3 +77,842 @@ Stack<Player> players = new Stack<Player>();
 this.setScreen(new BlackjackScreen(this, players));
 
 
+
+
+
+
+
+########################################################################
+########################################################################
+EXAMPLE
+########################################################################
+########################################################################
+import com.mygdx.game.testingClass.ListOverflow.ListStyle;
+import com.mygdx.game.testingClass.ScrollPaneOverflow.ScrollPaneStyle;
+
+public class SelectBoxOverflow<T> extends Widget implements Disableable{
+
+    static final Vector2 temp = new Vector2();
+
+    SelectBoxStyle style;
+    final Array<T> items = new Array<T>();
+    final ArraySelection<T> selection = new ArraySelection<T>(items);
+    SelectBoxList<T> selectBoxList;
+    private final TextBounds bounds = new TextBounds();
+    private float prefWidth, prefHeight;
+    private ClickListener clickListener;
+    boolean disabled;
+
+    public SelectBoxOverflow (Skin skin) {
+        this(skin.get(SelectBoxStyle.class));
+    }
+
+    public SelectBoxOverflow (Skin skin, String styleName) {
+        this(skin.get(styleName, SelectBoxStyle.class));
+    }
+
+    public SelectBoxOverflow (SelectBoxStyle style) {
+        setStyle(style);
+        setSize(getPrefWidth(), getPrefHeight());
+
+        selection.setActor(this);
+        selection.setRequired(true);
+
+        selectBoxList = new SelectBoxList<T>(this);
+
+        addListener(clickListener = new ClickListener() {
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                if (pointer == 0 && button != 0) return false;
+                if (disabled) return false;
+                if (selectBoxList.hasParent())
+                    hideList();
+                else
+                    showList();
+                return true;
+            }
+        });
+    }
+
+    /** Set the max number of items to display when the select box is opened. Set to 0 (the default) to display as many as fit in
+     * the stage height. */
+    public void setMaxListCount (int maxListCount) {
+        selectBoxList.maxListCount = maxListCount;
+    }
+
+    /** @return Max number of items to display when the box is opened, or <= 0 to display them all. */
+    public int getMaxListCount () {
+        return selectBoxList.maxListCount;
+    }
+
+    protected void setStage (Stage stage) {
+        if (stage == null) selectBoxList.hide();
+        super.setStage(stage);
+    }
+
+    public void setStyle (SelectBoxStyle style) {
+        if (style == null) throw new IllegalArgumentException("style cannot be null.");
+        this.style = style;
+        invalidateHierarchy();
+    }
+
+    /** Returns the select box style. Modifying the returned style may not have an effect until {@link #setStyle(SelectBoxStyle)}
+     * is called. */
+    public SelectBoxStyle getStyle () {
+        return style;
+    }
+
+    /** Set the backing Array that makes up the choices available in the SelectBox */
+    public void setItems (T... newItems) {
+        if (newItems == null) throw new IllegalArgumentException("newItems cannot be null.");
+        float oldPrefWidth = getPrefWidth();
+
+        items.clear();
+        items.addAll(newItems);
+        selection.validate();
+        selectBoxList.list.setItems(items);
+
+        invalidate();
+        if (oldPrefWidth != getPrefWidth()) invalidateHierarchy();
+    }
+
+    /** Set the backing Array that makes up the choices available in the SelectBox */
+    public void setItems (Array<T> newItems) {
+        if (newItems == null) throw new IllegalArgumentException("newItems cannot be null.");
+        float oldPrefWidth = getPrefWidth();
+
+        items.clear();
+        items.addAll(newItems);
+        selection.validate();
+        selectBoxList.list.setItems(items);
+
+        invalidate();
+        if (oldPrefWidth != getPrefWidth()) invalidateHierarchy();
+    }
+
+    //======================================//
+    public void centerItems(boolean center){
+        selectBoxList.list.centerItems(center);
+    }
+    //======================================//
+
+    public void clearItems () {
+        if (items.size == 0) return;
+        items.clear();
+        selection.clear();
+        invalidateHierarchy();
+    }
+
+    /** Retrieve the backing Array that makes up the chocies available in the SelectBox
+     * @see SelectBox#setItems(Array) */
+    public Array<T> getItems () {
+        return items;
+    }
+
+    @Override
+    public void layout () {
+        Drawable bg = style.background;
+        BitmapFont font = style.font;
+
+        if (bg != null) {
+            prefHeight = Math.max(bg.getTopHeight() + bg.getBottomHeight() + font.getCapHeight() - font.getDescent() * 2,
+                bg.getMinHeight());
+        } else
+            prefHeight = font.getCapHeight() - font.getDescent() * 2;
+
+        float maxItemWidth = 0;
+        for (int i = 0; i < items.size; i++)
+            maxItemWidth = Math.max(font.getBounds(items.get(i).toString()).width, maxItemWidth);
+
+        prefWidth = maxItemWidth;
+        if (bg != null) prefWidth += bg.getLeftWidth() + bg.getRightWidth();
+
+        //=========================================//
+        ListStyle listStyle = style.listStyle;
+        ScrollPaneStyle scrollStyle = style.scrollStyle;
+        //=========================================//
+
+        prefWidth = Math.max(
+            prefWidth,
+            maxItemWidth
+                + (scrollStyle.background == null ? 0 : scrollStyle.background.getLeftWidth()
+                    + scrollStyle.background.getRightWidth())
+                + listStyle.selection.getLeftWidth()
+                + listStyle.selection.getRightWidth()
+                + Math.max(style.scrollStyle.vScroll != null ? style.scrollStyle.vScroll.getMinWidth() : 0,
+                    style.scrollStyle.vScrollKnob != null ? style.scrollStyle.vScrollKnob.getMinWidth() : 0));
+    }
+
+    @Override
+    public void draw (Batch batch, float parentAlpha) {
+        validate();
+
+        Drawable background;
+        if (disabled && style.backgroundDisabled != null)
+            background = style.backgroundDisabled;
+        else if (selectBoxList.hasParent() && style.backgroundOpen != null)
+            background = style.backgroundOpen;
+        else if (clickListener.isOver() && style.backgroundOver != null)
+            background = style.backgroundOver;
+        else if (style.background != null)
+            background = style.background;
+        else
+            background = null;
+        final BitmapFont font = style.font;
+        final Color fontColor = (disabled && style.disabledFontColor != null) ? style.disabledFontColor : style.fontColor;
+
+        Color color = getColor();
+        float x = getX();
+        float y = getY();
+        float width = getWidth();
+        float height = getHeight();
+
+        batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
+        if (background != null) background.draw(batch, x, y, width, height);
+
+        T selected = selection.first();
+        if (selected != null) {
+            String string = selected.toString();
+            bounds.set(font.getBounds(string));
+            if (background != null) {
+                width -= background.getLeftWidth() + background.getRightWidth();
+                height -= background.getBottomHeight() + background.getTopHeight();
+                x += background.getLeftWidth();
+                y += (int)(height / 2 + background.getBottomHeight() + bounds.height / 2);
+            } else {
+                y += (int)(height / 2 + bounds.height / 2);
+            }
+            int numGlyphs = font.computeVisibleGlyphs(string, 0, string.length(), width);
+            font.setColor(fontColor.r, fontColor.g, fontColor.b, fontColor.a * parentAlpha);
+            font.draw(batch, string, x, y, 0, numGlyphs);
+        }
+    }
+
+    /** Get the set of selected items, useful when multiple items are selected
+     * @return a Selection object containing the selected elements */
+    public Selection<T> getSelection () {
+        return selection;
+    }
+
+    /** Returns the first selected item, or null. For multiple selections use {@link SelectBox#getSelection()}. */
+    public T getSelected () {
+        return selection.first();
+    }
+
+    /** Sets the selection to only the passed item, if it is a possible choice, else selects the first item. */
+    public void setSelected (T item) {
+        if (items.contains(item, false))
+            selection.set(item);
+        else if (items.size > 0)
+            selection.set(items.first());
+        else
+            selection.clear();
+    }
+
+    /** @return The index of the first selected item. The top item has an index of 0. Nothing selected has an index of -1. */
+    public int getSelectedIndex () {
+        ObjectSet<T> selected = selection.items();
+        return selected.size == 0 ? -1 : items.indexOf(selected.first(), false);
+    }
+
+    /** Sets the selection to only the selected index. */
+    public void setSelectedIndex (int index) {
+        selection.set(items.get(index));
+    }
+
+    public void setDisabled (boolean disabled) {
+        if (disabled && !this.disabled) hideList();
+        this.disabled = disabled;
+    }
+
+    public float getPrefWidth () {
+        validate();
+        return prefWidth;
+    }
+
+    public float getPrefHeight () {
+        validate();
+        return prefHeight;
+    }
+
+    public void showList () {
+        if (items.size == 0) return;
+        selectBoxList.show(getStage());
+    }
+
+    public void hideList () {
+        selectBoxList.hide();
+    }
+
+    /** Returns the list shown when the select box is open. */
+    public ListOverflow<T> getList () {
+        return selectBoxList.list;
+    }
+
+    /** Returns the scroll pane containing the list that is shown when the select box is open. */
+    public ScrollPaneOverflow getScrollPane () {
+        return selectBoxList;
+    }
+
+    protected void onShow (Actor selectBoxList, boolean below) {
+        selectBoxList.getColor().a = 0;
+        selectBoxList.addAction(fadeIn(0.3f, Interpolation.fade));
+    }
+
+    protected void onHide (Actor selectBoxList) {
+        selectBoxList.getColor().a = 1;
+        selectBoxList.addAction(sequence(fadeOut(0.15f, Interpolation.fade), removeActor()));
+    }
+
+    /** @author Nathan Sweet */
+    static class SelectBoxList<T> extends ScrollPaneOverflow {
+        private final SelectBoxOverflow<T> selectBox;
+        int maxListCount;
+        private final Vector2 screenPosition = new Vector2();
+
+        //=========================//
+        final ListOverflow<T> list;
+        //=========================//
+
+        private InputListener hideListener;
+        private Actor previousScrollFocus;
+
+        public SelectBoxList (final SelectBoxOverflow<T> selectBox) {
+            super(null, selectBox.style.scrollStyle);
+            this.selectBox = selectBox;
+
+            setOverscroll(false, false);
+            setFadeScrollBars(false);
+
+            list = new ListOverflow<T>(selectBox.style.listStyle);
+            list.setTouchable(Touchable.disabled);
+
+            setWidget(list);
+
+            list.addListener(new ClickListener() {
+                public void clicked (InputEvent event, float x, float y) {
+                    selectBox.selection.choose(list.getSelected());
+                    hide();
+                }
+
+                public boolean mouseMoved (InputEvent event, float x, float y) {
+                    list.setSelectedIndex(Math.min(selectBox.items.size - 1, (int)((list.getHeight() - y) / list.getItemHeight())));
+                    return true;
+                }
+            });
+
+            addListener(new InputListener() {
+                public void exit (InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    if (toActor == null || !isAscendantOf(toActor)) list.getSelection().set(selectBox.getSelected());
+                }
+            });
+
+            hideListener = new InputListener() {
+                public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                    Actor target = event.getTarget();
+                    if (isAscendantOf(target)) return false;
+                    list.getSelection().set(selectBox.getSelected());
+                    hide();
+                    return false;
+                }
+
+                public boolean keyDown (InputEvent event, int keycode) {
+                    if (keycode == Keys.ESCAPE) hide();
+                    return false;
+                }
+            };
+        }
+
+        public void show (Stage stage) {
+            if (list.isTouchable()) return;
+
+            stage.removeCaptureListener(hideListener);
+            stage.addCaptureListener(hideListener);
+            stage.addActor(this);
+
+            selectBox.localToStageCoordinates(screenPosition.set(0, 0));
+
+            // Show the list above or below the select box, limited to a number of items and the available height in the stage.
+            float itemHeight = list.getItemHeight();
+            float height = itemHeight * (maxListCount <= 0 ? selectBox.items.size : Math.min(maxListCount, selectBox.items.size));
+            Drawable scrollPaneBackground = getStyle().background;
+            if (scrollPaneBackground != null)
+                height += scrollPaneBackground.getTopHeight() + scrollPaneBackground.getBottomHeight();
+            Drawable listBackground = list.getStyle().background;
+            if (listBackground != null) height += listBackground.getTopHeight() + listBackground.getBottomHeight();
+
+            float heightBelow = screenPosition.y;
+            float heightAbove = stage.getCamera().viewportHeight - screenPosition.y - selectBox.getHeight();
+            boolean below = true;
+            if (height > heightBelow) {
+                if (heightAbove > heightBelow) {
+                    below = false;
+                    height = Math.min(height, heightAbove);
+                } else
+                    height = heightBelow;
+            }
+
+            if (below)
+                setY(screenPosition.y - height);
+            else
+                setY(screenPosition.y + selectBox.getHeight());
+            setX(screenPosition.x);
+            setSize(Math.max(getPrefWidth(), selectBox.getWidth()), height);
+
+            //=====================================//
+            list.widthForCenter(getWidth());
+            //=====================================//
+
+            validate();
+            scrollToCenter(0, list.getHeight() - selectBox.getSelectedIndex() * itemHeight - itemHeight / 2, 0, 0);
+            updateVisualScroll();
+
+            previousScrollFocus = null;
+            Actor actor = stage.getScrollFocus();
+            if (actor != null && !actor.isDescendantOf(this)) previousScrollFocus = actor;
+            stage.setScrollFocus(this);
+
+            list.setTouchable(Touchable.enabled);
+            clearActions();
+            selectBox.onShow(this, below);
+        }
+
+        public void hide () {
+            if (!list.isTouchable() || !hasParent()) return;
+            list.setTouchable(Touchable.disabled);
+
+            Stage stage = getStage();
+            if (stage != null) {
+                stage.removeCaptureListener(hideListener);
+                if (previousScrollFocus != null && previousScrollFocus.getStage() == null) previousScrollFocus = null;
+                Actor actor = stage.getScrollFocus();
+                if (actor == null || isAscendantOf(actor)) stage.setScrollFocus(previousScrollFocus);
+            }
+
+            clearActions();
+            selectBox.onHide(this);
+        }
+
+        public void draw (Batch batch, float parentAlpha) {
+            selectBox.localToStageCoordinates(temp.set(0, 0));
+            if (!temp.equals(screenPosition)) hide();
+            super.draw(batch, parentAlpha);
+        }
+
+        public void act (float delta) {
+            super.act(delta);
+            toFront();
+        }
+    }
+
+    /** The style for a select box, see {@link SelectBox}.
+     * @author mzechner
+     * @author Nathan Sweet */
+    static public class SelectBoxStyle {
+        public BitmapFont font;
+        public Color fontColor = new Color(1, 1, 1, 1);
+        /** Optional. */
+        public Color disabledFontColor;
+        /** Optional. */
+        public Drawable background;
+
+        //===============================//
+        public ScrollPaneStyle scrollStyle;
+        public ListStyle listStyle;
+        //===============================//
+
+        /** Optional. */
+        public Drawable backgroundOver, backgroundOpen, backgroundDisabled;
+
+        public SelectBoxStyle () {
+        }
+
+        public SelectBoxStyle (BitmapFont font, Color fontColor, Drawable background, ScrollPaneStyle scrollStyle,
+                ListStyle listStyle) {
+            this.font = font;
+            this.fontColor.set(fontColor);
+            this.background = background;
+            this.scrollStyle = scrollStyle;
+            this.listStyle = listStyle;
+        }
+
+        public SelectBoxStyle (SelectBoxStyle style) {
+            this.font = style.font;
+            this.fontColor.set(style.fontColor);
+            if (style.disabledFontColor != null) this.disabledFontColor = new Color(style.disabledFontColor);
+            this.background = style.background;
+            this.backgroundOver = style.backgroundOver;
+            this.backgroundOpen = style.backgroundOpen;
+            this.backgroundDisabled = style.backgroundDisabled;
+            this.scrollStyle = new ScrollPaneStyle(style.scrollStyle);
+            this.listStyle = new ListStyle(style.listStyle);
+        }
+    }
+
+}
+
+##################
+#################
+##################
+
+package com.packtpub.libgdx.canyonbunny.screens;
+
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.packtpub.libgdx.canyonbunny.game.Assets;
+import com.packtpub.libgdx.canyonbunny.util.CharacterSkin;
+import com.packtpub.libgdx.canyonbunny.util.Constants;
+import com.packtpub.libgdx.canyonbunny.util.GamePreferences;
+
+public class MenuScreen extends AbstractGameScreen {
+
+   private static final String TAG = MenuScreen.class.getName();
+
+   private Stage stage;
+   private Skin skinCanyonBunny;
+   private Skin skinLibgdx;
+
+   // menu
+   private Image imgBackground;
+   private Image imgLogo;
+   private Image imgInfo;
+   private Image imgCoins;
+   private Image imgBunny;
+   private Button btnMenuPlay;
+   private Button btnMenuOptions;
+
+   // options
+   private Window winOptions;
+   private TextButton btnWinOptSave;
+   private TextButton btnWinOptCancel;
+   private CheckBox chkSound;
+   private Slider sldSound;
+   private CheckBox chkMusic;
+   private Slider sldMusic;
+   private SelectBox selCharSkin;
+   private Image imgCharSkin;
+   private CheckBox chkShowFpsCounter;
+
+   // debug
+   private final float DEBUG_REBUILD_INTERVAL = 5.0f;
+   private boolean debugEnabled = false;
+   private float debugRebuildStage;
+
+   public MenuScreen (Game game) {
+      super(game);
+   }
+
+   @Override
+   public void render (float deltaTime) {
+      Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+      if (debugEnabled) {
+         debugRebuildStage -= deltaTime;
+         if (debugRebuildStage <= 0) {
+            debugRebuildStage = DEBUG_REBUILD_INTERVAL;
+            rebuildStage();
+         }
+      }
+      stage.act(deltaTime);
+      stage.draw();
+      Table.drawDebug(stage);
+   }
+
+   @Override
+   public void resize (int width, int height) {
+      stage.setViewport(new StretchViewport(Constants.VIEWPORT_GUI_WIDTH, Constants.VIEWPORT_GUI_HEIGHT));
+   }
+
+   @Override
+   public void show () {
+      stage = new Stage();
+      Gdx.input.setInputProcessor(stage);
+      rebuildStage();
+   }
+
+   @Override
+   public void hide () {
+      stage.dispose();
+      skinCanyonBunny.dispose();
+      skinLibgdx.dispose();
+   }
+
+   @Override
+   public void pause () {
+   }
+
+   private void rebuildStage () {
+      skinCanyonBunny = new Skin(Gdx.files.internal(Constants.SKIN_CANYONBUNNY_UI), new TextureAtlas(Constants.TEXTURE_ATLAS_UI));
+      skinLibgdx = new Skin(Gdx.files.internal(Constants.SKIN_LIBGDX_UI), new TextureAtlas(Constants.TEXTURE_ATLAS_LIBGDX_UI));
+
+      // build all layers
+      Table layerBackground = buildBackgroundLayer();
+      Table layerObjects = buildObjectsLayer();
+      Table layerLogos = buildLogosLayer();
+      Table layerControls = buildControlsLayer();
+      Table layerOptionsWindow = buildOptionsWindowLayer();
+
+      // assemble stage for menu screen
+      stage.clear();
+      Stack stack = new Stack();
+      stage.addActor(stack);
+      stack.setSize(Constants.VIEWPORT_GUI_WIDTH, Constants.VIEWPORT_GUI_HEIGHT);
+      stack.add(layerBackground);
+      stack.add(layerObjects);
+      stack.add(layerLogos);
+      stack.add(layerControls);
+      stage.addActor(layerOptionsWindow);
+   }
+
+   private Table buildBackgroundLayer () {
+      Table layer = new Table();
+      // + Background
+      imgBackground = new Image(skinCanyonBunny, "background");
+      layer.add(imgBackground);
+      return layer;
+   }
+
+   private Table buildObjectsLayer () {
+      Table layer = new Table();
+      // + Coins
+      imgCoins = new Image(skinCanyonBunny, "coins");
+      layer.addActor(imgCoins);
+      imgCoins.setPosition(135, 80);
+      // + Bunny
+      imgBunny = new Image(skinCanyonBunny, "bunny");
+      layer.addActor(imgBunny);
+      imgBunny.setPosition(355, 40);
+      return layer;
+   }
+
+   private Table buildLogosLayer () {
+      Table layer = new Table();
+      layer.left().top();
+      // + Game Logo
+      imgLogo = new Image(skinCanyonBunny, "logo");
+      layer.add(imgLogo);
+      layer.row().expandY();
+      // + Info Logos
+      imgInfo = new Image(skinCanyonBunny, "info");
+      layer.add(imgInfo).bottom();
+      if (debugEnabled) layer.debug();
+      return layer;
+   }
+
+   private Table buildControlsLayer () {
+      Table layer = new Table();
+      layer.right().bottom();
+      // + Play Button
+      btnMenuPlay = new Button(skinCanyonBunny, "play");
+      layer.add(btnMenuPlay);
+      btnMenuPlay.addListener(new ChangeListener() {
+         @Override
+         public void changed (ChangeEvent event, Actor actor) {
+            onPlayClicked();
+         }
+      });
+      layer.row();
+      // + Options Button
+      btnMenuOptions = new Button(skinCanyonBunny, "options");
+      layer.add(btnMenuOptions);
+      btnMenuOptions.addListener(new ChangeListener() {
+         @Override
+         public void changed (ChangeEvent event, Actor actor) {
+            onOptionsClicked();
+         }
+      });
+      if (debugEnabled) layer.debug();
+      return layer;
+   }
+
+   private Table buildOptWinAudioSettings () {
+      Table tbl = new Table();
+      // + Title: "Audio"
+      tbl.pad(10, 10, 0, 10);
+      tbl.add(new Label("Audio", skinLibgdx, "default-font", Color.ORANGE)).colspan(3);
+      tbl.row();
+      tbl.columnDefaults(0).padRight(10);
+      tbl.columnDefaults(1).padRight(10);
+      // + Checkbox, "Sound" label, sound volume slider
+      chkSound = new CheckBox("", skinLibgdx);
+      tbl.add(chkSound);
+      tbl.add(new Label("Sound", skinLibgdx));
+      sldSound = new Slider(0.0f, 1.0f, 0.1f, false, skinLibgdx);
+      tbl.add(sldSound);
+      tbl.row();
+      // + Checkbox, "Music" label, music volume slider
+      chkMusic = new CheckBox("", skinLibgdx);
+      tbl.add(chkMusic);
+      tbl.add(new Label("Music", skinLibgdx));
+      sldMusic = new Slider(0.0f, 1.0f, 0.1f, false, skinLibgdx);
+      tbl.add(sldMusic);
+      tbl.row();
+      return tbl;
+   }
+
+   private Table buildOptWinSkinSelection () {
+      Table tbl = new Table();
+      // + Title: "Character Skin"
+      tbl.pad(10, 10, 0, 10);
+      tbl.add(new Label("Character Skin", skinLibgdx, "default-font", Color.ORANGE)).colspan(2);
+      tbl.row();
+      // + Drop down box filled with skin items
+      selCharSkin = new SelectBox(CharacterSkin.values(), skinLibgdx);
+      selCharSkin.addListener(new ChangeListener() {
+         @Override
+         public void changed (ChangeEvent event, Actor actor) {
+            onCharSkinSelected(((SelectBox)actor).getSelectionIndex());
+         }
+      });
+      tbl.add(selCharSkin).width(120).padRight(20);
+      // + Skin preview image
+      imgCharSkin = new Image(Assets.instance.bunny.head);
+      tbl.add(imgCharSkin).width(50).height(50);
+      return tbl;
+   }
+
+   private Table buildOptWinDebug () {
+      Table tbl = new Table();
+      // + Title: "Debug"
+      tbl.pad(10, 10, 0, 10);
+      tbl.add(new Label("Debug", skinLibgdx, "default-font", Color.RED)).colspan(3);
+      tbl.row();
+      tbl.columnDefaults(0).padRight(10);
+      tbl.columnDefaults(1).padRight(10);
+      // + Checkbox, "Show FPS Counter" label
+      chkShowFpsCounter = new CheckBox("", skinLibgdx);
+      tbl.add(new Label("Show FPS Counter", skinLibgdx));
+      tbl.add(chkShowFpsCounter);
+      tbl.row();
+      return tbl;
+   }
+
+   private Table buildOptWinButtons () {
+      Table tbl = new Table();
+      // + Separator
+      Label lbl = null;
+      lbl = new Label("", skinLibgdx);
+      lbl.setColor(0.75f, 0.75f, 0.75f, 1);
+      lbl.setStyle(new LabelStyle(lbl.getStyle()));
+      lbl.getStyle().background = skinLibgdx.newDrawable("white");
+      tbl.add(lbl).colspan(2).height(1).width(220).pad(0, 0, 0, 1);
+      tbl.row();
+      lbl = new Label("", skinLibgdx);
+      lbl.setColor(0.5f, 0.5f, 0.5f, 1);
+      lbl.setStyle(new LabelStyle(lbl.getStyle()));
+      lbl.getStyle().background = skinLibgdx.newDrawable("white");
+      tbl.add(lbl).colspan(2).height(1).width(220).pad(0, 1, 5, 0);
+      tbl.row();
+      // + Save Button with event handler
+      btnWinOptSave = new TextButton("Save", skinLibgdx);
+      tbl.add(btnWinOptSave).padRight(30);
+      btnWinOptSave.addListener(new ChangeListener() {
+         @Override
+         public void changed (ChangeEvent event, Actor actor) {
+            onSaveClicked();
+         }
+      });
+      // + Cancel Button with event handler
+      btnWinOptCancel = new TextButton("Cancel", skinLibgdx);
+      tbl.add(btnWinOptCancel);
+      btnWinOptCancel.addListener(new ChangeListener() {
+         @Override
+         public void changed (ChangeEvent event, Actor actor) {
+            onCancelClicked();
+         }
+      });
+      return tbl;
+   }
+
+   private Table buildOptionsWindowLayer () {
+      winOptions = new Window("Options", skinLibgdx);
+      // + Audio Settings: Sound/Music CheckBox and Volume Slider
+      winOptions.add(buildOptWinAudioSettings()).row();
+      // + Character Skin: Selection Box (White, Gray, Brown)
+      winOptions.add(buildOptWinSkinSelection()).row();
+      // + Debug: Show FPS Counter
+      winOptions.add(buildOptWinDebug()).row();
+      // + Separator and Buttons (Save, Cancel)
+      winOptions.add(buildOptWinButtons()).pad(10, 0, 10, 0);
+
+      // Make options window slightly transparent
+      winOptions.setColor(1, 1, 1, 0.8f);
+      // Hide options window by default
+      winOptions.setVisible(false);
+      if (debugEnabled) winOptions.debug();
+      // Let TableLayout recalculate widget sizes and positions
+      winOptions.pack();
+      // Move options window to bottom right corner
+      winOptions.setPosition(Constants.VIEWPORT_GUI_WIDTH - winOptions.getWidth() - 50, 50);
+      return winOptions;
+   }
+
+   private void onPlayClicked () {
+      game.setScreen(new GameScreen(game));
+   }
+
+   private void onOptionsClicked () {
+      loadSettings();
+      btnMenuPlay.setVisible(false);
+      btnMenuOptions.setVisible(false);
+      winOptions.setVisible(true);
+   }
+
+   private void onSaveClicked () {
+      saveSettings();
+      onCancelClicked();
+   }
+
+   private void onCancelClicked () {
+      btnMenuPlay.setVisible(true);
+      btnMenuOptions.setVisible(true);
+      winOptions.setVisible(false);
+   }
+
+   private void onCharSkinSelected (int index) {
+      CharacterSkin skin = CharacterSkin.values()[index];
+      imgCharSkin.setColor(skin.getColor());
+   }
+
+   private void loadSettings () {
+      GamePreferences prefs = GamePreferences.instance;
+      prefs.load();
+      chkSound.setChecked(prefs.sound);
+      sldSound.setValue(prefs.volSound);
+      chkMusic.setChecked(prefs.music);
+      sldMusic.setValue(prefs.volMusic);
+      selCharSkin.setSelection(prefs.charSkin);
+      onCharSkinSelected(prefs.charSkin);
+      chkShowFpsCounter.setChecked(prefs.showFpsCounter);
+   }
+
+   private void saveSettings () {
+      GamePreferences prefs = GamePreferences.instance;
+      prefs.sound = chkSound.isChecked();
+      prefs.volSound = sldSound.getValue();
+      prefs.music = chkMusic.isChecked();
+      prefs.volMusic = sldMusic.getValue();
+      prefs.charSkin = selCharSkin.getSelectionIndex();
+      prefs.showFpsCounter = chkShowFpsCounter.isChecked();
+      prefs.save();
+   }
+
+}

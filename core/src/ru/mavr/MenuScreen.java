@@ -96,13 +96,18 @@ public class MenuScreen extends ScreenAdapter {
 						game.setScreen(game.gameScreen);
 					}
 				}
-
+				// Settings
 				if (touchPos.x > settings.getX() && touchPos.x < settings.getX() + settings.getWidth()) {
 					if (touchPos.y > settings.getY() && touchPos.y < settings.getY() + settings.getHeight()) {
 						game.setScreen(game.settigsScreen);
 					}
 				}
-
+				// Exit
+				if (touchPos.x > exit.getX() && touchPos.x < exit.getX() + exit.getWidth()) {
+					if (touchPos.y > exit.getY() && touchPos.y < exit.getY() + exit.getHeight()) {
+						Gdx.app.exit();
+					}
+				}
 
 				return false;
 			}

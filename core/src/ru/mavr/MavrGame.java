@@ -3,6 +3,7 @@ package ru.mavr;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 
 import java.util.ArrayList;
 
@@ -13,6 +14,7 @@ public class MavrGame extends Game {
     public GameScreen gameScreen;
     public MenuScreen menuScreen;
     public SettingsScreen settigsScreen;
+    public Preferences prefs;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -48,8 +50,11 @@ public class MavrGame extends Game {
 
     @Override
     public void create() {
-        this.playersCount = 2;
-        Gdx.input.setCatchKey(Input.Keys.BACK, true);// Override system back
+        // Settings loading
+        this.prefs = Gdx.app.getPreferences("Preferences");
+        this.playersCount = this.prefs.getInteger("playersCount", 2);
+        // Override system back
+        Gdx.input.setCatchKey(Input.Keys.BACK, true);
         ArrayList<Player> players = new ArrayList<Player>();
         //Create Game table and render
         createPlayers(this.playersCount, players);
