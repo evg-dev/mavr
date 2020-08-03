@@ -9,7 +9,6 @@ public class Card {
     public final Sprite backSprite;
     public final Sprite topSprite;
     private final int value;
-    //    public final Suit suit;
     public Sprite sprite;
     private final MavrGame.Suit suit;
     TextureAtlas atlas;
@@ -17,7 +16,6 @@ public class Card {
 
     public float X;
     public float Y;
-    private CardDeck cardDeck;
 
 
     public Card(MavrGame.Suit suit, float X, float Y, boolean turned, int index, int value) {

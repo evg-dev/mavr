@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class MavrGame extends Game {
 
@@ -15,6 +16,7 @@ public class MavrGame extends Game {
     public MenuScreen menuScreen;
     public SettingsScreen settigsScreen;
     public Preferences prefs;
+    public Stack<Card> fullDeckCards;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -55,32 +57,11 @@ public class MavrGame extends Game {
         this.playersCount = this.prefs.getInteger("playersCount", 2);
         // Override system back
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
-        ArrayList<Player> players = new ArrayList<Player>();
-        //Create Game table and render
-        createPlayers(this.playersCount, players);
-        cardDeck = new CardDeck(players);
-        Card lastCard = this.cardDeck.shuffleDeckCards.pop();
-        // TODO: first playedCards from player
-        cardDeck.playedCards.add(lastCard);
-        this.gameScreen = new GameScreen(this, cardDeck, players);
+
+        this.cardDeck = new CardDeck(this);
+        // Menu screen
         this.menuScreen = new MenuScreen(this);
         this.settigsScreen = new SettingsScreen(this);
         this.setScreen(menuScreen);
-//        this.setScreen(gameScreen);
-    }
-
-//    private void createNewGame() {
-//
-//    }
-
-    private void createPlayers(int playersCount, ArrayList<Player> players) {
-        for (int i = 1; i <= playersCount; i++) {
-            Player player = new Player("Player" + i);
-            if (i == playersCount) {
-                // Human player
-                player.type = true;
-            }
-            players.add(player);
-        }
     }
 }

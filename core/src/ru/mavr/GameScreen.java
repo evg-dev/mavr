@@ -49,10 +49,12 @@ public class GameScreen extends ScreenAdapter {
 		this.currentPlayerIndex = game.playersCount - 1; // Default player begin, after to settings
 		this.gameLogic = new GameLogic(this.game);
 
-		topDeck = this.cardDeck.shuffleDeckCards.peek();
-		topDeck.turned = true;
-		topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
-		topDeck.setPosition(-1.05f, -0.5f);
+		if (this.cardDeck.shuffleDeckCards.size() > 0) {
+			topDeck = this.cardDeck.shuffleDeckCards.peek();
+			topDeck.turned = true;
+			topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
+			topDeck.setPosition(-1.05f, -0.5f);
+		}
 	}
 
 	/**
@@ -164,6 +166,7 @@ public class GameScreen extends ScreenAdapter {
 				for (Card card : player.cards
 				) {
 					if (card != null) {
+						System.out.println("Card Turned : " + card.turned);
 						float cardX;
 						if (len <= 4) {
 							cardX = -len / 2 + count;
@@ -258,6 +261,7 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	private void turnHandling() {
+		System.out.println("Current Player" + currentPlayer.name);
 		this.currentPlayer.turn = false;
 		if (checkEndRound()) {
 			// Refresh counted
@@ -285,7 +289,7 @@ public class GameScreen extends ScreenAdapter {
 
 	private boolean checkEndRound() {
 		if (this.currentPlayer.cards.size() == 0) {
-			System.out.println(currentPlayer.name + "Win!!!");
+			System.out.println(currentPlayer.name + " Win!!!");
 			for (Player player : this.players
 			) {
 				for (Card card : player.cards
@@ -295,9 +299,12 @@ public class GameScreen extends ScreenAdapter {
 				player.cards.clear();
 			}
 			// TODO: Go to Score screen, Long running
-			this.cardDeck = null;
-			this.cardDeck = new CardDeck(this.players);
+
+			this.cardDeck = new CardDeck(game);
+			CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
+			// TODO: first playedCards from player
 			Card lastCard = this.cardDeck.shuffleDeckCards.pop();
+			lastCard.turned = false;
 			cardDeck.playedCards.add(lastCard);
 			topDeck = cardDeck.shuffleDeckCards.peek();
 			topDeck.turned = true;
@@ -356,7 +363,9 @@ public class GameScreen extends ScreenAdapter {
 				public boolean keyUp(int keycode) {
 					if (keycode == Input.Keys.BACK) {
 						// Back to menu
-						game.setScreen(game.menuScreen);
+						if (game != null) {
+							game.setScreen(game.menuScreen);
+						}
 					}
 					return false;
 				}
@@ -379,9 +388,9 @@ public class GameScreen extends ScreenAdapter {
 		this.spriteBatch.begin();
 		this.spriteBatch.setProjectionMatrix(cam.combined);
 		renderCard();
-//		this.spriteBatch.setProjectionMatrix(textCam.combined);
-//		RenderText renderText = new RenderText(height, width, this.players);
-//		renderText.draw(this.spriteBatch);
+		this.spriteBatch.setProjectionMatrix(textCam.combined);
+		RenderText renderText = new RenderText(height, width, this.players);
+		renderText.draw(this.spriteBatch);
 		this.spriteBatch.end();
 	}
 }

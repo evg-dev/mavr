@@ -90,33 +90,6 @@ public class SettingsScreen extends MenuScreen {
 
             }
         });
-
-//        stage.addListener(new InputListener() {
-//            @Override
-//            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-//                Vector2 coord = stage.screenToStageCoordinates(new Vector2(x, y));
-//                Actor hitActor = stage.hit(coord.x, coord.y,true);
-//
-//                if(hitActor!=null) {
-//                    Gdx.app.log("Hit " ,hitActor.getName());//will return null if no Name was set imgTable.setName("table");
-//                    System.out.println("Hit " + selectBox.getSelection());
-//                    System.out.println(hitActor.getSelection());
-//                    Array<Actor> actors = stage.getActors();
-//                    Actor actor = actors.get(1);
-//                    Stage s = actor.getStage();
-//                }
-//                return true;
-//                }
-//            });
-
-//            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
-//                getSelect(selectBox.);
-//                System.out.println(selectBox.getSelection());
-//                getSelect();
-//                return false;
-//            }
-//        });
-
     }
 
     public void setMenuScreen(Integer selected) {

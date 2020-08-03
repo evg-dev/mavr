@@ -14,9 +14,13 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+import java.util.ArrayList;
+import java.util.Stack;
+
 public class MenuScreen extends ScreenAdapter {
 
 	private final TextButton.TextButtonStyle textButtonStyle;
+	public Stack<Card> fullDeckCards;
 	public BitmapFont font;
 	private final TextButton continueGame;
 	private final TextButton statistic;
@@ -30,6 +34,7 @@ public class MenuScreen extends ScreenAdapter {
 	private Vector3 touchPos;
 	public float width;
 	public float height;
+	private CardDeck cardDeck;
 
 
 	public MenuScreen(MavrGame game) {
@@ -40,6 +45,7 @@ public class MenuScreen extends ScreenAdapter {
 //		skin.addRegions(buttonAtlas);
 		this.width = Gdx.graphics.getWidth();
 		this.height = Gdx.graphics.getHeight();
+//		this.fullDeckCards = new Stack<Card>();
 
 		this.spriteBatch = new SpriteBatch();
 		this.touchPos = new Vector3();
@@ -69,6 +75,19 @@ public class MenuScreen extends ScreenAdapter {
 		exit.setPosition(-exit.getWidth() / 2, -this.height / 2 + 100);
 	}
 
+	private void createPlayers(int playersCount, ArrayList<Player> players) {
+		for (int i = 1; i <= playersCount; i++) {
+			Player player = new Player("Player" + i);
+			if (i == playersCount) {
+				// Human player
+				player.type = true;
+				System.out.println("Player Human : " + i);
+			}
+			System.out.println("Player : " + i);
+			players.add(player);
+		}
+	}
+
 	@Override
 	public void show() {
 //		spriteBatch = this.spriteBatch;
@@ -91,8 +110,21 @@ public class MenuScreen extends ScreenAdapter {
 				// newGame;
 				if (touchPos.x > newGame.getX() && touchPos.x < newGame.getX() + newGame.getWidth()) {
 					if (touchPos.y > newGame.getY() && touchPos.y < newGame.getY() + newGame.getHeight()) {
-						// TODO: new game
-						game = new MavrGame();
+						// Create new game
+						System.out.println("Create start");
+
+						ArrayList<Player> players = new ArrayList<Player>();
+						game.playersCount = game.prefs.getInteger("playersCount", 2);
+						createPlayers(game.playersCount, players);
+						game.cardDeck = new CardDeck(game);
+						CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
+						Card lastCard = game.cardDeck.shuffleDeckCards.pop();
+						lastCard.turned = false;
+						// TODO: first playedCards from player
+						game.cardDeck.playedCards.add(lastCard);
+						game.gameScreen = new GameScreen(game, game.cardDeck, players);
+
+						System.out.println("Create end");
 						game.setScreen(game.gameScreen);
 					}
 				}
@@ -141,7 +173,9 @@ public class MenuScreen extends ScreenAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		spriteBatch.setProjectionMatrix(cam.combined);
 		spriteBatch.begin();
-		continueGame.draw(spriteBatch, 1);
+		if (game.fullDeckCards != null) {
+			continueGame.draw(spriteBatch, 1);
+		}
 		newGame.draw(spriteBatch, 1);
 		settings.draw(spriteBatch, 1);
 		statistic.draw(spriteBatch, 1);
