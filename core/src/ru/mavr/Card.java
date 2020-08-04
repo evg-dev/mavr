@@ -2,16 +2,13 @@ package ru.mavr;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class Card {
 
     public final Sprite backSprite;
     public final Sprite topSprite;
     private final int value;
-    public Sprite sprite;
     private final MavrGame.Suit suit;
-    TextureAtlas atlas;
     public boolean turned; //back upside = true
 
     public float X;
@@ -20,15 +17,14 @@ public class Card {
 
     public Card(MavrGame.Suit suit, float X, float Y, boolean turned, int index, int value) {
 
-        this.atlas = GameScreen.getAtlas();
         this.turned = turned;
         this.value = value;
         this.suit = suit;
         this.X = X;
         this.Y = Y;
 
-        this.backSprite = this.atlas.createSprite(("back"), 1);
-        this.topSprite = this.atlas.createSprite(suit.suitName, index);
+        this.backSprite = MavrGame.atlas.createSprite(("back"), 1);
+        this.topSprite = MavrGame.atlas.createSprite(suit.suitName, index);
     }
 
     public void setSize(float cardWidth, float cardHeight) {

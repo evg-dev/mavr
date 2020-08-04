@@ -41,7 +41,6 @@ public class GameScreen extends ScreenAdapter {
 	public float width;
 	private BitmapFont font;
 
-
 	public GameScreen(MavrGame game, CardDeck cardDeck, ArrayList<Player> players) {
 		this.game = game;
 		this.cardDeck = cardDeck;
@@ -55,14 +54,6 @@ public class GameScreen extends ScreenAdapter {
 			topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
 			topDeck.setPosition(-1.05f, -0.5f);
 		}
-	}
-
-	/**
-	 * @return TextureAtlas
-	 */
-	public static TextureAtlas getAtlas() {
-		atlas = new TextureAtlas("cards/carddeck.atlas");
-		return atlas;
 	}
 
 	public boolean HandleSpriteClick(Card sprite) {
@@ -166,7 +157,7 @@ public class GameScreen extends ScreenAdapter {
 				for (Card card : player.cards
 				) {
 					if (card != null) {
-						System.out.println("Card Turned : " + card.turned);
+//						System.out.println("Card Turned : " + card.turned);
 						float cardX;
 						if (len <= 4) {
 							cardX = -len / 2 + count;
@@ -300,7 +291,8 @@ public class GameScreen extends ScreenAdapter {
 			}
 			// TODO: Go to Score screen, Long running
 
-			this.cardDeck = new CardDeck(game);
+			game.cardDeck = new CardDeck(game);
+			System.out.println("cardDeck count : " + game.cardDeck.shuffleDeckCards.size());
 			CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
 			// TODO: first playedCards from player
 			Card lastCard = this.cardDeck.shuffleDeckCards.pop();

@@ -117,6 +117,7 @@ public class MenuScreen extends ScreenAdapter {
 						game.playersCount = game.prefs.getInteger("playersCount", 2);
 						createPlayers(game.playersCount, players);
 						game.cardDeck = new CardDeck(game);
+						System.out.println("cardDeck count : " + game.cardDeck.shuffleDeckCards.size());
 						CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
 						Card lastCard = game.cardDeck.shuffleDeckCards.pop();
 						lastCard.turned = false;
@@ -173,7 +174,8 @@ public class MenuScreen extends ScreenAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		spriteBatch.setProjectionMatrix(cam.combined);
 		spriteBatch.begin();
-		if (game.fullDeckCards != null) {
+		// Hide continue first
+		if (game.gameScreen != null) {
 			continueGame.draw(spriteBatch, 1);
 		}
 		newGame.draw(spriteBatch, 1);

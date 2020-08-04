@@ -4,6 +4,10 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.utils.async.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -14,9 +18,11 @@ public class MavrGame extends Game {
     public int playersCount;
     public GameScreen gameScreen;
     public MenuScreen menuScreen;
+    public LoadingScreen loadingScreen;
     public SettingsScreen settigsScreen;
     public Preferences prefs;
     public Stack<Card> fullDeckCards;
+    public static TextureAtlas atlas;
 
     public enum Suit {
         HEARTS("hearts"), SPADES("spades"), DIAMONDS("diamonds"), CLUBS("clubs");
@@ -50,18 +56,25 @@ public class MavrGame extends Game {
         }
     }
 
+    public AssetManager manager = new AssetManager();
+
     @Override
     public void create() {
+
+        // Static load
+        atlas = new TextureAtlas("cards/carddeck.atlas");
+
+        loadingScreen = new LoadingScreen(this);
+        this.setScreen(loadingScreen);
         // Settings loading
         this.prefs = Gdx.app.getPreferences("Preferences");
         this.playersCount = this.prefs.getInteger("playersCount", 2);
         // Override system back
         Gdx.input.setCatchKey(Input.Keys.BACK, true);
-
         this.cardDeck = new CardDeck(this);
-        // Menu screen
         this.menuScreen = new MenuScreen(this);
+        this.setScreen(this.menuScreen);
+        // Menu screen
         this.settigsScreen = new SettingsScreen(this);
-        this.setScreen(menuScreen);
     }
 }

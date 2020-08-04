@@ -60,6 +60,7 @@ public class CardDeck {
                         card.turned = false;
                     }
                     player.cards.add(card);
+                    System.out.println(player.name + " add " + card.getValue());
                 }
             }
         }
