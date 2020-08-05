@@ -75,15 +75,15 @@ public class MenuScreen extends ScreenAdapter {
 		exit.setPosition(-exit.getWidth() / 2, -this.height / 2 + 100);
 	}
 
-	private void createPlayers(int playersCount, ArrayList<Player> players) {
+	public static void createPlayers(int playersCount, ArrayList<Player> players) {
 		for (int i = 1; i <= playersCount; i++) {
 			Player player = new Player("Player" + i);
 			if (i == playersCount) {
 				// Human player
 				player.type = true;
-				System.out.println("Player Human : " + i);
+//				System.out.println("Player Human : " + i);
 			}
-			System.out.println("Player : " + i);
+//			System.out.println("Player : " + i);
 			players.add(player);
 		}
 	}
@@ -111,21 +111,15 @@ public class MenuScreen extends ScreenAdapter {
 				if (touchPos.x > newGame.getX() && touchPos.x < newGame.getX() + newGame.getWidth()) {
 					if (touchPos.y > newGame.getY() && touchPos.y < newGame.getY() + newGame.getHeight()) {
 						// Create new game
-						System.out.println("Create start");
+//						System.out.println("Create start");
 
 						ArrayList<Player> players = new ArrayList<Player>();
 						game.playersCount = game.prefs.getInteger("playersCount", 2);
-						createPlayers(game.playersCount, players);
-						game.cardDeck = new CardDeck(game);
-						System.out.println("cardDeck count : " + game.cardDeck.shuffleDeckCards.size());
-						CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
-						Card lastCard = game.cardDeck.shuffleDeckCards.pop();
-						lastCard.turned = false;
-						// TODO: first playedCards from player
-						game.cardDeck.playedCards.add(lastCard);
+						MenuScreen.createPlayers(game.playersCount, players);
+						MavrGame.shuffleDeck(game, players);
 						game.gameScreen = new GameScreen(game, game.cardDeck, players);
 
-						System.out.println("Create end");
+//						System.out.println("Create end");
 						game.setScreen(game.gameScreen);
 					}
 				}

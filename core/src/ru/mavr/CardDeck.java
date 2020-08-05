@@ -13,7 +13,6 @@ public class CardDeck {
 
         this.playedCards = new Stack<Card>();
 
-        this.playedCards = new Stack<Card>();
         if (game.fullDeckCards == null) {
             Stack<Card> deckCards = new Stack<Card>();
             int i = 1;
@@ -21,8 +20,8 @@ public class CardDeck {
             ) {
                 for (MavrGame.Names name : MavrGame.Names.values()
                 ) {
-                    deckCards.add(new Card(suit, 0, 0, false, name.atlasIndex, name.defaultValue));
-                    System.out.println("Card Create count :" + i + "  " + suit + "  " + name.atlasIndex);
+                    deckCards.add(new Card(suit, 0, 0, true, name.atlasIndex, name.defaultValue));
+//                    System.out.println("Card Create count :" + i + "  " + suit + "  " + name.atlasIndex);
                     i++;
                 }
             }
@@ -52,23 +51,23 @@ public class CardDeck {
                 if (deckCards.size() > 0) {
                     Card card = deckCards.pop();
 
-                    if (!player.type) {
-                        card.turned = true;
-                        System.out.println("player.name : " + player.name);
-                    } else {
-                        System.out.println("player.name Human : " + player.name);
-                        card.turned = false;
-                    }
+//                    if (!player.type) {
+//                        card.turned = true;
+//                        System.out.println("player.name : " + player.name);
+//                    } else {
+//                        System.out.println("player.name Human : " + player.name);
+//                        card.turned = false;
+//                    }
                     player.cards.add(card);
-                    System.out.println(player.name + " add " + card.getValue());
+//                    System.out.println(player.name + " add " + card.getValue());
                 }
             }
         }
     }
 
     public Card getCard() {
-        System.out.println("shuffleDeckCards :" + this.shuffleDeckCards.size());
-        System.out.println("playedCards : " + this.playedCards.size());
+//        System.out.println("shuffleDeckCards :" + this.shuffleDeckCards.size());
+//        System.out.println("playedCards : " + this.playedCards.size());
         if (!this.shuffleDeckCards.empty()) {
             if (this.shuffleDeckCards.size() == 1) {
                 // Last card shuffle deck

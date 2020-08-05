@@ -33,13 +33,14 @@ public class GameScreen extends ScreenAdapter {
 	public Card card;
 	public Card lastPlayedCard;
 	public Card topDeck;
-	int i;
+
 	int count;
-	private Player player;
 	public Player currentPlayer;
 	public float height;
 	public float width;
 	private BitmapFont font;
+	public final float topDeckX = -1.05f;
+	public final float topDeckY = -0.5f;
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, ArrayList<Player> players) {
 		this.game = game;
@@ -49,44 +50,57 @@ public class GameScreen extends ScreenAdapter {
 		this.gameLogic = new GameLogic(this.game);
 
 		if (this.cardDeck.shuffleDeckCards.size() > 0) {
-			topDeck = this.cardDeck.shuffleDeckCards.peek();
+			topDeck = game.cardDeck.shuffleDeckCards.peek();
 			topDeck.turned = true;
 			topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
-			topDeck.setPosition(-1.05f, -0.5f);
+			topDeck.setPosition(topDeckX, topDeckY);
 		}
 	}
 
 	public boolean HandleSpriteClick(Card sprite) {
 		// Top deck
-		if (sprite != null) {
-			if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
-				if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
-					// topDeck
-					player = this.players.get(game.playersCount - 1); // Because counter from 0
-					if (sprite == topDeck) {
+//		System.out.println("Top deck boolean" + topDeck.getValue());
+		System.out.println("getWidth" + sprite.getX());
+		System.out.println("Height" + sprite.getY());
+		if (touchPos.x > topDeckX && touchPos.x < topDeckX + sprite.getWidth()) {
+			if (touchPos.y > topDeckY && touchPos.y < topDeckY + sprite.getHeight()) {
+				// topDeck
+				Player player = this.players.get(game.playersCount - 1); // Because counter from 0
+				System.out.println("Sprite click : " + sprite.getValue());
+//				if (sprite == topDeck) {
 //						System.out.println("Click Deck");
-						card = cardDeck.getCard();
-						if (card != null) {
-							card.turned = false;
-							player.cards.add(card);
-							topDeck = cardDeck.getCardDeckValue();
-							if (topDeck != null) {
-								topDeck.turned = true;
-								return true;
-							}
-						}
+				card = game.cardDeck.getCard();
+				if (card != null) {
+//					card.turned = false;
+					player.cards.add(card);
+					topDeck = game.cardDeck.getCardDeckValue();
+//						System.out.println("topDeck1 : " + topDeck.getValue());
+					if (topDeck != null) {
+//						topDeck.turned = true;
+//							System.out.println("CadrDeck count : " + game.cardDeck.shuffleDeckCards.size());
+//							System.out.println("topDeck2 : " + card.getValue());
+						return true;
 					}
 				}
+//				}
 			}
 		}
 		return false;
 	}
 
-	public void HandleClick(Player player) {
+
+	/**
+	 * Main click handler
+	 *
+	 * @param player Player
+	 * @return boolean
+	 */
+	public boolean HandleClick(Player player) {
 		if (player.turn) {
 			boolean deckClick = HandleSpriteClick(topDeck);
 			if (deckClick) {
 				turnHandling();
+				return false;
 			}
 			ArrayList<Card> clickedCards = new ArrayList<Card>();
 			int len = player.cards.size();
@@ -112,6 +126,7 @@ public class GameScreen extends ScreenAdapter {
 							cardDeck.playedCards.add(clickedCard);
 							player.cards.remove(clickedCard);
 							turnHandling();
+							return false;
 						}
 						break;
 					}
@@ -121,14 +136,17 @@ public class GameScreen extends ScreenAdapter {
 					cardDeck.playedCards.add(clickedCards.get(0));
 					player.cards.remove(clickedCards.get(0));
 					turnHandling();
+					return false;
 				}
 			}
 		}
+		return false;
 	}
 
 	private void renderTopDeck() {
 		if (cardDeck.shuffleDeckCards != null) {
 			card = cardDeck.getCardDeckValue();
+//			System.out.println("Top decK render" + card.getValue());
 			if (card != null) {
 				card.turned = true;
 				card.setSize(CARD_WIDTH, CARD_HEIGHT);
@@ -141,12 +159,13 @@ public class GameScreen extends ScreenAdapter {
 	private void renderCard() {
 		renderTopDeck();
 		// played cards
-		lastPlayedCard = this.cardDeck.playedCards.peek();
+		lastPlayedCard = game.cardDeck.playedCards.peek();
+		lastPlayedCard.turned = false;
 		lastPlayedCard.setSize(CARD_WIDTH, CARD_HEIGHT);
 		lastPlayedCard.setPosition(0.05f, -0.5f);
 		lastPlayedCard.render(spriteBatch);
 
-		i = 0;
+		int i = 0;
 		for (Player player : this.players
 		) {
 			int playersCount = this.players.size();
@@ -157,6 +176,7 @@ public class GameScreen extends ScreenAdapter {
 				for (Card card : player.cards
 				) {
 					if (card != null) {
+						card.turned = !player.type;
 //						System.out.println("Card Turned : " + card.turned);
 						float cardX;
 						if (len <= 4) {
@@ -183,6 +203,7 @@ public class GameScreen extends ScreenAdapter {
 				for (Card card : player.cards
 				) {
 					if (card != null) {
+						card.turned = !player.type;
 						float cardX;
 						float cardY;
 						if (len <= 4) {
@@ -214,6 +235,7 @@ public class GameScreen extends ScreenAdapter {
 				for (Card card : player.cards
 				) {
 					if (card != null) {
+						card.turned = !player.type;
 						float cardX;
 						float cardY;
 						// Left
@@ -252,7 +274,8 @@ public class GameScreen extends ScreenAdapter {
 	}
 
 	private void turnHandling() {
-		System.out.println("Current Player" + currentPlayer.name);
+//		System.out.println("Current Player" + currentPlayer.name);
+		System.out.println("CadrDeck count : " + game.cardDeck.shuffleDeckCards.size());
 		this.currentPlayer.turn = false;
 		if (checkEndRound()) {
 			// Refresh counted
@@ -291,15 +314,9 @@ public class GameScreen extends ScreenAdapter {
 			}
 			// TODO: Go to Score screen, Long running
 
-			game.cardDeck = new CardDeck(game);
-			System.out.println("cardDeck count : " + game.cardDeck.shuffleDeckCards.size());
-			CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
-			// TODO: first playedCards from player
-			Card lastCard = this.cardDeck.shuffleDeckCards.pop();
-			lastCard.turned = false;
-			cardDeck.playedCards.add(lastCard);
-			topDeck = cardDeck.shuffleDeckCards.peek();
-			topDeck.turned = true;
+			MavrGame.shuffleDeck(game, players);
+			topDeck = game.cardDeck.shuffleDeckCards.peek();
+//			topDeck.turned = true;
 			return true;
 		} else {
 			return false;

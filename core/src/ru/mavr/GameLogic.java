@@ -17,7 +17,7 @@ public class GameLogic {
 
             if (this.game.gameScreen.currentPlayer.cards.size() > 0) {
                 Card card = this.game.gameScreen.currentPlayer.cards.remove(0);
-                card.turned = false;
+//                card.turned = false;
                 this.game.gameScreen.cardDeck.playedCards.add(card);
             }
             this.game.gameScreen.currentPlayer.turn = false;

@@ -4,10 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.utils.async.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -18,7 +16,6 @@ public class MavrGame extends Game {
     public int playersCount;
     public GameScreen gameScreen;
     public MenuScreen menuScreen;
-    public LoadingScreen loadingScreen;
     public SettingsScreen settigsScreen;
     public Preferences prefs;
     public Stack<Card> fullDeckCards;
@@ -56,16 +53,13 @@ public class MavrGame extends Game {
         }
     }
 
-    public AssetManager manager = new AssetManager();
+//    public AssetManager manager = new AssetManager();
 
     @Override
     public void create() {
 
         // Static load
         atlas = new TextureAtlas("cards/carddeck.atlas");
-
-        loadingScreen = new LoadingScreen(this);
-        this.setScreen(loadingScreen);
         // Settings loading
         this.prefs = Gdx.app.getPreferences("Preferences");
         this.playersCount = this.prefs.getInteger("playersCount", 2);
@@ -77,4 +71,17 @@ public class MavrGame extends Game {
         // Menu screen
         this.settigsScreen = new SettingsScreen(this);
     }
+
+    public static void shuffleDeck(MavrGame game, ArrayList<Player> players) {
+
+        game.cardDeck = new CardDeck(game);
+        System.out.println("cardDeck count : " + game.cardDeck.shuffleDeckCards.size());
+        CardDeck.initialCardToPlayers(players, game.cardDeck.shuffleDeckCards);
+        Card lastCard = game.cardDeck.shuffleDeckCards.pop();
+        lastCard.turned = false;
+        // TODO: first playedCards from player
+        game.cardDeck.playedCards.add(lastCard);
+
+    }
+
 }
