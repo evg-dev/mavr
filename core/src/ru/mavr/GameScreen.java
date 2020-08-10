@@ -46,7 +46,8 @@ public class GameScreen extends ScreenAdapter {
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
-		this.currentPlayerIndex = game.playersCount - 1; // Default player begin, after to settings
+		this.currentPlayerIndex = game.playersCount - 1; // Default humnan player begin, after to settings
+		game.gameScreen = this;
 		this.gameLogic = new GameLogic(this.game);
 
 		if (this.cardDeck.shuffleDeckCards.size() > 0) {
@@ -55,6 +56,7 @@ public class GameScreen extends ScreenAdapter {
 			topDeck.setSize(CARD_WIDTH, CARD_HEIGHT);
 			topDeck.setPosition(topDeckX, topDeckY);
 		}
+		GameLogic.gameTurn(game);
 	}
 
 	public boolean HandleSpriteClick(Card sprite) {
@@ -75,12 +77,10 @@ public class GameScreen extends ScreenAdapter {
 					player.cards.add(card);
 					topDeck = game.cardDeck.getCardDeckValue();
 //						System.out.println("topDeck1 : " + topDeck.getValue());
-					if (topDeck != null) {
-//						topDeck.turned = true;
-//							System.out.println("CadrDeck count : " + game.cardDeck.shuffleDeckCards.size());
-//							System.out.println("topDeck2 : " + card.getValue());
-						return true;
-					}
+					//						topDeck.turned = true;
+					//							System.out.println("CadrDeck count : " + game.cardDeck.shuffleDeckCards.size());
+					//							System.out.println("topDeck2 : " + card.getValue());
+					return topDeck != null;
 				}
 //				}
 			}
@@ -93,14 +93,14 @@ public class GameScreen extends ScreenAdapter {
 	 * Main click handler
 	 *
 	 * @param player Player
-	 * @return boolean
 	 */
-	public boolean HandleClick(Player player) {
+	public void HandleClick(Player player) {
+		System.out.println("Player " + player.name);
 		if (player.turn) {
 			boolean deckClick = HandleSpriteClick(topDeck);
 			if (deckClick) {
-				turnHandling();
-				return false;
+				GameLogic.endTurnHandling(game);
+				return;
 			}
 			ArrayList<Card> clickedCards = new ArrayList<Card>();
 			int len = player.cards.size();
@@ -108,11 +108,12 @@ public class GameScreen extends ScreenAdapter {
 				sprite = player.cards.get(i);
 				if (touchPos.x > sprite.getX() && touchPos.x < sprite.getX() + sprite.getWidth()) {
 					if (touchPos.y > sprite.getY() && touchPos.y < sprite.getY() + sprite.getHeight()) {
+						System.out.println("Sprite click");
 						clickedCards.add(sprite);
 					}
 				}
 			}
-			System.out.println(clickedCards.toString());
+//			System.out.println(clickedCards.toString());
 			if (clickedCards.size() > 1) {
 				// Search Card by click coordinates
 				float x1 = clickedCards.get(0).getX();
@@ -125,8 +126,8 @@ public class GameScreen extends ScreenAdapter {
 						if (gameLogic.checkClickedCard(clickedCard)) {
 							cardDeck.playedCards.add(clickedCard);
 							player.cards.remove(clickedCard);
-							turnHandling();
-							return false;
+							GameLogic.endTurnHandling(game);
+							return;
 						}
 						break;
 					}
@@ -135,12 +136,10 @@ public class GameScreen extends ScreenAdapter {
 				if (gameLogic.checkClickedCard(clickedCards.get(0))) {
 					cardDeck.playedCards.add(clickedCards.get(0));
 					player.cards.remove(clickedCards.get(0));
-					turnHandling();
-					return false;
+					GameLogic.endTurnHandling(game);
 				}
 			}
 		}
-		return false;
 	}
 
 	private void renderTopDeck() {
@@ -273,56 +272,6 @@ public class GameScreen extends ScreenAdapter {
 		}
 	}
 
-	private void turnHandling() {
-//		System.out.println("Current Player" + currentPlayer.name);
-		System.out.println("CadrDeck count : " + game.cardDeck.shuffleDeckCards.size());
-		this.currentPlayer.turn = false;
-		if (checkEndRound()) {
-			// Refresh counted
-			// TODO: random first turn
-			this.currentPlayerIndex = game.playersCount - 1;
-			this.currentPlayer = this.players.get(this.currentPlayerIndex);
-			this.currentPlayer.turn = true;
-			if (!this.currentPlayer.type) {
-				this.gameLogic.aiTurn();
-				turnHandling();
-			}
-		} else {
-			this.currentPlayerIndex++;
-			if (this.currentPlayerIndex > game.playersCount - 1) {
-				this.currentPlayerIndex -= game.playersCount;
-			}
-			this.currentPlayer = this.players.get(currentPlayerIndex);
-			this.currentPlayer.turn = true;
-			if (!this.currentPlayer.type) {
-				this.gameLogic.aiTurn();
-				turnHandling();
-			}
-		}
-	}
-
-	private boolean checkEndRound() {
-		if (this.currentPlayer.cards.size() == 0) {
-			System.out.println(currentPlayer.name + " Win!!!");
-			for (Player player : this.players
-			) {
-				for (Card card : player.cards
-				) {
-					player.score += card.countPoint();
-				}
-				player.cards.clear();
-			}
-			// TODO: Go to Score screen, Long running
-
-			MavrGame.shuffleDeck(game, players);
-			topDeck = game.cardDeck.shuffleDeckCards.peek();
-//			topDeck.turned = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 //	public Player getPlayer(int i) {
 //		System.out.println("ddd " + players.toString());
 //		return this.players.get(i - 1);
@@ -356,7 +305,6 @@ public class GameScreen extends ScreenAdapter {
 //		System.out.println(this.currentPlayer.toString() + "Click");
 		this.currentPlayer = this.players.get(this.currentPlayerIndex);
 		this.currentPlayer.turn = true;
-//		Gdx.input.setCatchKey(Input.Keys.BACK, true);// setCatchBackKey(true);
 		if (this.currentPlayer.type) {
 			Gdx.input.setInputProcessor(new InputAdapter() {
 				public boolean touchUp(int x, int y, int pointer, int button) {
@@ -387,7 +335,6 @@ public class GameScreen extends ScreenAdapter {
 		this.spriteBatch.dispose();
 		atlas.dispose();
 		font.dispose();
-//		generator.dispose();
 	}
 
 	@Override

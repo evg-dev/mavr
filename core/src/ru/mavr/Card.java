@@ -9,7 +9,7 @@ public class Card {
     public final Sprite topSprite;
     private final int value;
     private final MavrGame.Suit suit;
-    public boolean turned; //back upside = true
+    public boolean turned; //back upside = true, back down = false
 
     public float X;
     public float Y;

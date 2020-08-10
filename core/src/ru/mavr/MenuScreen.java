@@ -1,6 +1,5 @@
 package ru.mavr;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -81,11 +80,13 @@ public class MenuScreen extends ScreenAdapter {
 			if (i == playersCount) {
 				// Human player
 				player.type = true;
-//				System.out.println("Player Human : " + i);
+				System.out.println("Player Human : " + player.name);
 			}
 //			System.out.println("Player : " + i);
 			players.add(player);
 		}
+//		players[0] players.get(0) = true;
+//		System.out.println("Player Human : " + player.name);
 	}
 
 	@Override
