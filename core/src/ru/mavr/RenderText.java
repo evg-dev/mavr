@@ -1,15 +1,11 @@
 package ru.mavr;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.sun.jmx.remote.internal.ArrayNotificationBuffer;
 
 import java.util.ArrayList;
-
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 public class RenderText {
 
@@ -23,20 +19,11 @@ public class RenderText {
     private FreeTypeFontGenerator generator;
     private BitmapFont font;
 
-    RenderText(float height, float width, ArrayList<Player> players) {
+    RenderText(float height, float width, ArrayList<Player> players, BitmapFont font) {
         // TODO: handle from players count
         this.width = width;
         this.height = height;
-//        System.out.println(this.height + "height");
-//        System.out.println(this.width + "width");
-        generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/AeroMaticsRegular.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 32;
-        // Soap fo fonts
-//		parameter.magFilter = Texture.TextureFilter.Linear;
-//		parameter.minFilter = Texture.TextureFilter.Linear;
-
-        this.font = generator.generateFont(parameter);
+        this.font = font;
         this.count = players.size();
 
         this.LabelPlayer1 = new GlyphLayout();
@@ -75,6 +62,5 @@ public class RenderText {
                     (this.height / 2) - 15);
         }
 //        spriteBatch.dispose();
-        generator.dispose();
     }
 }

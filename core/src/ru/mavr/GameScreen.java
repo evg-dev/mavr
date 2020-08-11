@@ -18,6 +18,10 @@ public class GameScreen extends ScreenAdapter {
 	public final static float CARD_WIDTH = 0.75f;
 	public final static float CARD_HEIGHT = CARD_WIDTH * 277f / 200f;
 	public final static float MINIMUM_VIEWPORT_SIZE = 5f;
+	public final float topDeckX = -1.05f;
+	public final float topDeckY = -0.5f;
+
+	public RenderText renderText;
 	public GameLogic gameLogic;
 	public int currentPlayerIndex;
 	public ArrayList<Player> players;
@@ -39,15 +43,13 @@ public class GameScreen extends ScreenAdapter {
 	public float height;
 	public float width;
 	private BitmapFont font;
-	public final float topDeckX = -1.05f;
-	public final float topDeckY = -0.5f;
 
 	public GameScreen(MavrGame game, CardDeck cardDeck, ArrayList<Player> players) {
+		game.gameScreen = this;
 		this.game = game;
 		this.cardDeck = cardDeck;
 		this.players = players;
 		this.currentPlayerIndex = game.playersCount - 1; // Default humnan player begin, after to settings
-		game.gameScreen = this;
 		this.gameLogic = new GameLogic(this.game);
 
 		if (this.cardDeck.shuffleDeckCards.size() > 0) {
@@ -153,6 +155,10 @@ public class GameScreen extends ScreenAdapter {
 				card.render(spriteBatch);
 			}
 		}
+	}
+
+	private void renderText() {
+		this.renderText.draw(this.spriteBatch);
 	}
 
 	private void renderCard() {
@@ -272,11 +278,6 @@ public class GameScreen extends ScreenAdapter {
 		}
 	}
 
-//	public Player getPlayer(int i) {
-//		System.out.println("ddd " + players.toString());
-//		return this.players.get(i - 1);
-//	}
-
 	@Override
 	public void resize(int width, int height) {
 		this.width = width;
@@ -345,8 +346,7 @@ public class GameScreen extends ScreenAdapter {
 		this.spriteBatch.setProjectionMatrix(cam.combined);
 		renderCard();
 		this.spriteBatch.setProjectionMatrix(textCam.combined);
-		RenderText renderText = new RenderText(height, width, this.players);
-		renderText.draw(this.spriteBatch);
+		renderText();
 		this.spriteBatch.end();
 	}
 }

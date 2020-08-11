@@ -19,8 +19,9 @@ import java.util.Stack;
 public class MenuScreen extends ScreenAdapter {
 
 	private final TextButton.TextButtonStyle textButtonStyle;
-	public Stack<Card> fullDeckCards;
+	public BitmapFont textFont;
 	public BitmapFont font;
+	public Stack<Card> fullDeckCards;
 	private final TextButton continueGame;
 	private final TextButton statistic;
 	private final TextButton newGame;
@@ -54,6 +55,10 @@ public class MenuScreen extends ScreenAdapter {
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
 		parameter.size = 50;
 		font = generator.generateFont(parameter);
+
+		FreeTypeFontGenerator.FreeTypeFontParameter textParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		textParameter.size = 32;
+		textFont = generator.generateFont(parameter);
 
 		textButtonStyle = new TextButton.TextButtonStyle();
 		textButtonStyle.font = font;
@@ -113,13 +118,12 @@ public class MenuScreen extends ScreenAdapter {
 					if (touchPos.y > newGame.getY() && touchPos.y < newGame.getY() + newGame.getHeight()) {
 						// Create new game
 //						System.out.println("Create start");
-
 						ArrayList<Player> players = new ArrayList<Player>();
 						game.playersCount = game.prefs.getInteger("playersCount", 2);
 						MenuScreen.createPlayers(game.playersCount, players);
 						MavrGame.shuffleDeck(game, players);
 						game.gameScreen = new GameScreen(game, game.cardDeck, players);
-
+						game.gameScreen.renderText = new RenderText(height, width, players, textFont);
 //						System.out.println("Create end");
 						game.setScreen(game.gameScreen);
 					}
@@ -159,6 +163,7 @@ public class MenuScreen extends ScreenAdapter {
 	@Override
 	public void dispose() {
 		spriteBatch.dispose();
+		generator.dispose();
 //		atlas.dispose();
 	}
 
