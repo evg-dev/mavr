@@ -3,25 +3,20 @@ package ru.mavr;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.ArraySelection;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 
 public class SettingsScreen extends MenuScreen {
 
@@ -32,6 +27,7 @@ public class SettingsScreen extends MenuScreen {
     private SpriteBatch spriteBatch;
     private Vector3 touchPos;
     private RenderText selectBox;
+    private Camera textCam;
 
     public SettingsScreen(MavrGame game) {
         super(game);
@@ -42,15 +38,31 @@ public class SettingsScreen extends MenuScreen {
         this.spriteBatch = new SpriteBatch();
         this.touchPos = new Vector3();
         this.cam = new OrthographicCamera();
+        this.textCam = new OrthographicCamera();
 
         font = new BitmapFont();
+        font.getData().setScale(5f);
+        font.setColor(Color.BLACK);
+
 
         stage = new Stage();
         Skin skin = new Skin(Gdx.files.internal("skin/glassy-ui.json"));
-        skin.getFont("font").getData().setScale(1.5f);
+//        skin.getFont("font").getData().setScale(1.5f);
 
-        dialog = new Dialog("Setting", skin) {
+        dialog = new Dialog("", skin) {
         };
+
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/AeroMaticsRegular.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 50;
+        parameter.color = Color.BLACK;
+        font = generator.generateFont(parameter);
+
+        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.font = font;
+
+        TextButton label = new TextButton("Number of players", textButtonStyle);
+        label.setPosition(width / 2 - label.getWidth() / 2, height / 2 + 200);
 
         dialog.setSize(500, 500);
         dialog.setPosition(400, 1000);
@@ -60,14 +72,12 @@ public class SettingsScreen extends MenuScreen {
         int item = this.game.prefs.getInteger("playersCount");
         selectBox.setSelected(String.valueOf(item));
         selectBox.getStyle().listStyle.font.getData().scale(2);
-//        selectBox.getStyle().listStyle.font.getData().
-//        selectBox.setSize(50, 50);
-
 
         dialog.getContentTable().defaults().pad(20);
         dialog.getContentTable().add(selectBox).width(100);
-        ;
+
         stage.addActor(dialog);
+        stage.addActor(label);
 
         stage.addListener(new ClickListener() {
 
@@ -85,9 +95,6 @@ public class SettingsScreen extends MenuScreen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-//                System.out.println(selectBox.getSelection());
-//                System.out.println(event.getRelatedActor());
-
             }
         });
     }
@@ -113,7 +120,6 @@ public class SettingsScreen extends MenuScreen {
     @Override
     public void dispose() {
         spriteBatch.dispose();
-//		atlas.dispose();
     }
 
     @Override
@@ -121,11 +127,10 @@ public class SettingsScreen extends MenuScreen {
         super.render(delta);
         Gdx.gl.glClearColor(3.9f / 255.0f, 42.0f / 255.0f, 5.1f / 255.0f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        spriteBatch.setProjectionMatrix(cam.combined);
         spriteBatch.begin();
+        spriteBatch.setProjectionMatrix(cam.combined);
         stage.act();
         stage.draw();
         spriteBatch.end();
     }
-
 }
